@@ -130,12 +130,7 @@ namespace Pearl.UI
         {
             if (labelContainer != null && !string.IsNullOrEmpty(IDText))
             {
-#if LOCALIZATION
-                string text = localizeLabel && tableName != null ? LocalizationManager.Translate(tableName, IDText) : IDText;
-#else
-                string text = IDText;
-#endif
-                labelContainer.SetText(text);
+                labelContainer.SetText(IDText);
             }
 
             if (inputDataType == InputDataType.Image)
