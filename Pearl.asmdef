@@ -1,0 +1,28 @@
+{
+    "name": "Pearl",
+    "rootNamespace": "",
+    "references": [
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:58bed0e7c5306824586d7eda03609289",
+        "GUID:b134867f3cd9e37428b652f97bf28b72",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:bcc75752368a72b4aba4043ea13b2a1a",
+        "GUID:eec0964c48f6f4e40bc3ec2257ccf8c5",
+        "GUID:84651a3751eca9349aac36a66bba901b",
+        "GUID:21b0c8d1703a94250bfac916590cea4f",
+        "GUID:42d17e60f657e4548824a0197cbb9cdb",
+        "GUID:6f7b2b32e52ba51438c43181dd32aed0",
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:21d1eb854b91ade49bc69a263d12bee2",
+        "GUID:a65d9a73e86e8a16094732b640e510ef"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
