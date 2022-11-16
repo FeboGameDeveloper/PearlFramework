@@ -3,7 +3,7 @@ A framework for unity
 
 UNITY VERSIONS
 
-Unity 2022 o superiore
+>= Unity 2022
 
 
 
