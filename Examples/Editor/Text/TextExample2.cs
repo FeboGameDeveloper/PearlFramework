@@ -1,7 +1,7 @@
 using Pearl.Events;
 using UnityEngine;
 
-namespace Pearl.Examples.TextExamples
+namespace Pearl.Examples.Text
 {
     public class TextExample2 : MonoBehaviour
     {

@@ -23,7 +23,7 @@ namespace Pearl.UI
     }
 
     [RequireComponent(typeof(PearlButton))]
-    public class NavbarElement : ElementForInput
+    public class NavbarElement : ElementForInput, IFocusLayer
     {
         #region Inspector fields
         [SerializeField]

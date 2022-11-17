@@ -774,25 +774,6 @@ namespace Pearl
                 newComponent.GetCopyOf(component);
             }
         }
-
-        /// <summary>
-        /// Adds only one component of the T type to the gameobject. 
-        /// If the component already exists, it returns it.
-        /// </summary>
-        /// <param name = "obj">The subject in which the component will be added</param>
-        public static T AddOnlyOneComponent<T>(this GameObject obj) where T : Component
-        {
-            T aux = null;
-            if (obj != null)
-            {
-                aux = obj.GetComponent<T>();
-                if (!aux)
-                {
-                    return obj.AddComponent<T>();
-                }
-            }
-            return aux;
-        }
         #endregion
     }
 }

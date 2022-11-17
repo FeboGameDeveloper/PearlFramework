@@ -273,7 +273,6 @@ namespace Pearl
         public static string GetStringLocalize(string tableString, string ID, bool dontVisualizeWithErrorLocalization = true, Action actionIfError = null)
         {
             return LocalizationManager.Translate(tableString, ID, dontVisualizeWithErrorLocalization, actionIfError);
-            return ID;
         }
 #endif
 

@@ -55,6 +55,7 @@ namespace Pearl.UI
             }
 #endif
         }
+
         #endregion
 
         #region Storage Focus

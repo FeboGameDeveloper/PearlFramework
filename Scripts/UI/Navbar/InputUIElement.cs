@@ -11,6 +11,8 @@ namespace Pearl.UI
         [SerializeField]
         private string inputEvent = null;
         [SerializeField]
+        private StateButton stateButton = StateButton.Down;
+        [SerializeField]
         private AudioClip audioFeedbck = null;
         [SerializeField]
         private UnityEvent unityEvent = new();
@@ -22,14 +24,14 @@ namespace Pearl.UI
         #endregion
 
         #region Property
-        public string Input { get { return inputEvent; } set { inputEvent = value; } }
-        public AudioClip Audio { get { return audioFeedbck; } set { audioFeedbck = value; } }
+        public string InputEvent { get { return inputEvent; } set { inputEvent = value; } }
+        public AudioClip AudioFeedback { get { return audioFeedbck; } set { audioFeedbck = value; } }
+        public StateButton StateButton { get { return stateButton; } set { stateButton = value; } }
         #endregion
-
 
         #region UnityCallbacks
         // Start is called before the first frame update
-        void Start()
+        protected void Start()
         {
             if (TryGetComponent<FocusLayerElement>(out var element))
             {
@@ -49,6 +51,14 @@ namespace Pearl.UI
         #endregion
 
         #region Public Methods
+        public void Setting(string inputEvent, StateButton stateButton, AudioClip audioFeedbck, UnityAction unityAction)
+        {
+            this.inputEvent = inputEvent;
+            this.stateButton = stateButton;
+            this.audioFeedbck = audioFeedbck;
+            AddAction(unityAction);
+        }
+
         public void InvokeAction()
         {
             unityEvent.Invoke();
@@ -73,7 +83,7 @@ namespace Pearl.UI
             if (InputManager.Input && !_useInput)
             {
                 _useInput = true;
-                InputManager.PerformedHandle(inputEvent, InvokeAction, ActionEvent.Add, StateButton.Down);
+                InputManager.PerformedHandle(inputEvent, InvokeAction, ActionEvent.Add, stateButton);
             }
         }
 
@@ -82,7 +92,7 @@ namespace Pearl.UI
             if (InputManager.Input && _useInput)
             {
                 _useInput = false;
-                InputManager.PerformedHandle(inputEvent, InvokeAction, ActionEvent.Remove, StateButton.Down);
+                InputManager.PerformedHandle(inputEvent, InvokeAction, ActionEvent.Remove, stateButton);
             }
         }
 

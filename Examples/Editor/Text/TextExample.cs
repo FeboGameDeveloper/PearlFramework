@@ -1,7 +1,7 @@
 using Pearl.Events;
 using UnityEngine;
 
-namespace Pearl.Examples.TextExamples
+namespace Pearl.Examples.Text
 {
     public class TextExample : MonoBehaviour
     {
@@ -40,12 +40,12 @@ namespace Pearl.Examples.TextExamples
 
         public void GlobalMethod()
         {
-            Debug.LogManager.Log("Test");
+            Pearl.Debug.LogManager.Log("Test");
         }
 
         public void Method1(string name, string value)
         {
-            Debug.LogManager.Log(name + "  " + value);
+            Pearl.Debug.LogManager.Log(name + "  " + value);
             Invoke("Wait", 1);
         }
 
@@ -56,12 +56,12 @@ namespace Pearl.Examples.TextExamples
 
         public void Method2()
         {
-            Debug.LogManager.Log("Finish");
+            Pearl.Debug.LogManager.Log("Finish");
         }
 
         public void Method3()
         {
-            Debug.LogManager.Log("Start");
+            Pearl.Debug.LogManager.Log("Start");
         }
 
     }

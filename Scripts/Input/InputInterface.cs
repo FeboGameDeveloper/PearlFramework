@@ -334,8 +334,6 @@ namespace Pearl.Input
                         }
                     }
 
-
-
                     StateButton stateButton = context.canceled ? StateButton.Up : (context.control.IsPressed() ? StateButton.Down : StateButton.Up);
                     DelegateInfo delegateInfo = new(inputActonString, stateButton);
 

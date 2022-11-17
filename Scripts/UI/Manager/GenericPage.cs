@@ -51,9 +51,9 @@ namespace Pearl.UI
         #endregion
 
         #region Unity Callbacks
-        protected override void Awake()
+        protected override void Start()
         {
-            base.Awake();
+            base.Start();
 
             if (useNamePageForFocusGroup)
             {

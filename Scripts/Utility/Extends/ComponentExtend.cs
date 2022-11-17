@@ -8,7 +8,7 @@ namespace Pearl
 {
     public static class ComponentExtend
     {
-        private static List<Component> _componentCache = new();
+        private readonly static List<Component> _componentCache = new();
 
         #region component no alloc
         /// <summary>
@@ -152,7 +152,38 @@ namespace Pearl
             return result.IsAlmostSpecificCount();
         }
 
-        //Root
+        public static T AddOnlyOneComponent<T>(this GameObject obj) where T : Component
+        {
+            T aux = null;
+
+            if (obj != null)
+            {
+                if (obj.TryGetComponent<T>(out aux))
+                {
+                    return aux;
+                }
+                return obj.AddComponent<T>();
+            }
+            return aux;
+        }
+
+        public static T AddOnlyOneComponent<T>(this Component component) where T : Component
+        {
+            return component != null ? AddOnlyOneComponent<T>(component.gameObject) : null;
+        }
+
+        public static bool TryAddOnlyOneComponent<T>(this GameObject obj, out T result) where T : Component
+        {
+            result = AddOnlyOneComponent<T>(obj);
+            return result != null;
+        }
+
+        public static bool TryAddOnlyOneComponent<T>(this Component component, out T result) where T : Component
+        {
+            result = null;
+            return component != null && TryAddOnlyOneComponent<T>(component.gameObject, out result);
+        }
+
         public static T[] GetComponentsInChildren<T>(this Component @this, bool onlyChildren = false, bool includeInactive = true)
         {
             var result = @this.GetComponentsInChildren<T>(includeInactive);

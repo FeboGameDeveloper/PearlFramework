@@ -202,12 +202,10 @@ namespace Pearl.UI
                 button.onClick = buttonClickEvent;
                 textManager.SetText(buttonInfo.text);
 
-                if (buttonInfo.useInput)
+                if (buttonInfo.useInput && child.TryAddOnlyOneComponent<InputUIElement>(out var inputUIElement))
                 {
-                    var inputUIElement = child.gameObject.AddOnlyOneComponent<InputUIElement>();
-                    inputUIElement.Input = buttonInfo.nameInput;
-                    inputUIElement.Audio = buttonInfo.clip;
-                    inputUIElement.AddAction(() => buttonClickEvent.Invoke());
+                    inputUIElement.Setting(buttonInfo.nameInput, StateButton.Up, buttonInfo.clip,
+                        () => buttonClickEvent.Invoke());
                 }
 
 
