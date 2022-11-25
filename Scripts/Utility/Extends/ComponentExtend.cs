@@ -63,6 +63,7 @@ namespace Pearl
         }
         #endregion
 
+
         public static bool FindComponent<T>(this Component @this)
         {
             if (@this != null)
@@ -240,7 +241,7 @@ namespace Pearl
         {
             T container = obj.AddComponent<T>();
 
-            ReflectionExtend.SetFieldOrPropertyOrMethod(container, param1, value1);
+            ReflectionExtend.SetValue(container, param1, value1);
 
             return container;
         }

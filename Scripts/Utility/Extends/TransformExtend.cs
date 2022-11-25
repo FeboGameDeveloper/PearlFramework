@@ -276,7 +276,7 @@ namespace Pearl
         {
             if (@this != null && @this.childCount > index)
             {
-                GameObjectExtend.DestroyGameObject(@this.GetChild(index).gameObject, immediate);
+                GameObjectExtend.DestroyExtend(@this.GetChild(index).gameObject, immediate);
             }
         }
 

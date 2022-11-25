@@ -2,49 +2,61 @@
 
 namespace Pearl
 {
-    public enum RectangleEdge { Left, Right, Up, Down }
-
-    public enum RectanglePoints { LeftUp, RightUp, RightDown, LeftDown }
-
     public static class BoxCollider2DExtend
     {
-        public static Vector2 GetPerimeterPoint(this BoxCollider2D collider, RectangleEdge edge, float lerpValue)
+        private readonly static Vector2[] vertex = new Vector2[4];
+
+        public static Vector2[] GetBoxPoints2D(this BoxCollider2D box)
         {
-            float quaternionAngle = collider.transform.rotation.eulerAngles.z;
-
-            Vector3 center = collider.bounds.center;
-            Vector2 extens = collider.transform.lossyScale * 0.5f;
-            extens.Scale(collider.size);
-
-            Vector2 pointLeftUp = new Vector2(center.x - extens.x, center.y + extens.y);
-            Vector2 pointRightUp = new Vector2(center.x + extens.x, center.y + extens.y);
-            Vector2 pointRightDown = new Vector2(center.x + extens.x, center.y - extens.y);
-            Vector2 pointLeftDown = new Vector2(center.x - extens.x, center.y - extens.y);
-
-            if (quaternionAngle != 0)
+            if (box == null)
             {
-                pointLeftUp = QuaternionExtend.RotationByCenter(pointLeftUp, center, quaternionAngle);
-                pointRightUp = QuaternionExtend.RotationByCenter(pointRightUp, center, quaternionAngle);
-                pointRightDown = QuaternionExtend.RotationByCenter(pointRightDown, center, quaternionAngle);
-                pointLeftDown = QuaternionExtend.RotationByCenter(pointLeftDown, center, quaternionAngle);
+                return null;
             }
 
-            switch (edge)
-            {
-                case RectangleEdge.Up:
-                    return Vector2.Lerp(pointLeftUp, pointRightUp, lerpValue);
-                case RectangleEdge.Right:
-                    return Vector2.Lerp(pointRightUp, pointRightDown, lerpValue);
-                case RectangleEdge.Down:
-                    return Vector2.Lerp(pointRightDown, pointLeftDown, lerpValue);
-                case RectangleEdge.Left:
-                    return Vector2.Lerp(pointLeftDown, pointLeftUp, lerpValue);
-            }
+            var size = box.size * 0.5f;
 
-            return Vector2.zero;
+            var mtx = Matrix4x4.TRS(box.bounds.center, box.transform.localRotation, box.transform.localScale);
+
+            vertex[0] = mtx.MultiplyPoint3x4(new Vector3(-size.x, size.y));
+            vertex[1] = mtx.MultiplyPoint3x4(new Vector3(-size.x, -size.y));
+            vertex[2] = mtx.MultiplyPoint3x4(new Vector3(size.x, -size.y));
+            vertex[3] = mtx.MultiplyPoint3x4(new Vector3(size.x, size.y));
+
+            return vertex;
         }
 
+        public static Vector2[] GetEdgesDirectionBoxPoints2D(this BoxCollider2D box, Vector2 dir)
+        {
+            if (box == null)
+            {
+                return null;
+            }
 
+            GetBoxPoints2D(box);
+            var bounds = box.bounds;
 
+            float distance = Mathf.Max(bounds.extents.x, bounds.extents.y);
+
+            Vector2 aux = bounds.center + (Vector3)(dir.normalized * distance);
+            Segment segment1 = new(bounds.center, aux);
+
+            bool isIntersection = GeometryUtils.SegmentSegmentIntersection(out _, segment1, new(vertex[0], vertex[1]));
+            if (isIntersection)
+            {
+                return new Vector2[] { vertex[0], vertex[1] };
+            }
+            isIntersection = GeometryUtils.SegmentSegmentIntersection(out _, segment1, new(vertex[1], vertex[2]));
+            if (isIntersection)
+            {
+                return new Vector2[] { vertex[1], vertex[2] };
+            }
+            isIntersection = GeometryUtils.SegmentSegmentIntersection(out _, segment1, new(vertex[2], vertex[3]));
+            if (isIntersection)
+            {
+                return new Vector2[] { vertex[2], vertex[3] };
+            }
+
+            return new Vector2[] { vertex[3], vertex[0] };
+        }
     }
 }

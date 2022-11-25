@@ -13,9 +13,7 @@ namespace Pearl
                 return;
             }
 
-            T temp = lhs;
-            lhs = rhs;
-            rhs = temp;
+            (rhs, lhs) = (lhs, rhs);
         }
 
         public static bool Cast<T>(this object obj, out T result)

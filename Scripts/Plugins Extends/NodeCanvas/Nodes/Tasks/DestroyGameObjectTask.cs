@@ -15,7 +15,7 @@ namespace Pearl.NodeCanvas.Tasks
         {
             if (obj != null)
             {
-                GameObjectExtend.DestroyGameObject(obj.value);
+                GameObjectExtend.DestroyExtend(obj.value);
             }
             EndAction();
         }

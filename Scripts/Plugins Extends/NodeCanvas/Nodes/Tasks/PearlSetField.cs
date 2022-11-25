@@ -6,14 +6,15 @@ using Pearl.Debug;
 using System;
 using UnityEngine;
 
-namespace Pearl
+namespace Pearl.NodeCanvas.Tasks
 {
     [Category("Pearl")]
-    public class PearlSetField : ActionTask<Transform>
+    public class PearlSetFieldTask : ActionTask<Transform>
     {
         public BBParameter<NameClass> nameClass = default;
         public BBParameter<bool> useAgent = true;
         public BBParameter<PrimitiveEnum> primitiveStruct = default;
+        public BBParameter<MemberEnum> memberTypeBB = MemberEnum.Either;
 
         [Conditional("useAgent", 0)]
         public BBParameter<string> nameRoot = default;
@@ -68,7 +69,8 @@ namespace Pearl
 
                 if (component != null)
                 {
-                    ReflectionExtend.SetField(component, nameField.value, GetValue(component));
+                    MemberEnum memberType = memberTypeBB != null ? memberTypeBB.value : MemberEnum.Either;
+                    ReflectionExtend.SetValue(component, nameField.value, GetValue(component));
                 }
             }
 

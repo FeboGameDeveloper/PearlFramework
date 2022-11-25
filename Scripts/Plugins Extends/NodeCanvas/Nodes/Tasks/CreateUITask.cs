@@ -59,7 +59,7 @@ namespace Pearl.NodeCanvas.Tasks
 
                 if (container == null)
                 {
-                    GameObjectExtend.CreateUIlement(prefab, out container, canvasTipologyBB.value);
+                    GameObjectExtend.CreateUIlement(prefab, out container, canvasTipology: canvasTipologyBB.value);
                     if (container != null && nameElementBB.IsExist(out var el) && !string.IsNullOrEmpty(el))
                     {
                         container.name = el;

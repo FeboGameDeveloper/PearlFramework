@@ -61,7 +61,7 @@ namespace Pearl.Debug
 
             if (DebugManager.GetActiveDebug("debugScreen"))
             {
-                GameObjectExtend.CreateUIlement(debugScreenPrefab, out _debugScreenParent, CanvasTipology.Debug);
+                GameObjectExtend.CreateUIlement(debugScreenPrefab, out _debugScreenParent, canvasTipology: CanvasTipology.Debug);
                 CreateDebugScreen();
                 _isDebugScreen = true;
             }
@@ -127,7 +127,7 @@ namespace Pearl.Debug
                     }
                 }
 
-                if (!isExist && GameObjectExtend.CreateGameObject<DebugScreenElement>(debugScreenElementPrefab, out var element, _debugScreenParent))
+                if (!isExist && GameObjectExtend.CreateGameObject<DebugScreenElement>(debugScreenElementPrefab, out var element, parent: _debugScreenParent))
                 {
                     element.SetField(field.member, field.name);
                 }

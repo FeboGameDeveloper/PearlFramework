@@ -57,7 +57,7 @@ namespace Pearl.UI
                         }
                         else
                         {
-                            GameObjectExtend.CreateGameObject<NavbarElement>(navbarElementPrefab, out navbarElement, transform);
+                            GameObjectExtend.CreateGameObject<NavbarElement>(navbarElementPrefab, out navbarElement, parent: transform);
                         }
 
                         if (navbarElement != null)
@@ -92,7 +92,7 @@ namespace Pearl.UI
                 {
                     if (element != null)
                     {
-                        GameObjectExtend.DestroyGameObject(element.gameObject);
+                        GameObjectExtend.DestroyExtend(element.gameObject);
                     }
                 }
                 navbarElements.Clear();

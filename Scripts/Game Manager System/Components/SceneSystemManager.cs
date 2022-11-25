@@ -1,5 +1,6 @@
 ﻿using Pearl.Events;
 using Pearl.Input;
+using Pearl.UI;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -114,7 +115,7 @@ namespace Pearl
             if (useLoadingBar)
             {
                 BlackPageManager.DisappearBlackPage();
-                GameObjectExtend.CreateUIlement(loadingBarPrefab, out loadingIstance, UI.CanvasTipology.HUD);
+                GameObjectExtend.CreateUIlement(loadingBarPrefab, out loadingIstance, canvasTipology: CanvasTipology.HUD);
             }
 
             // The Application loads the Scene in the background as the current Scene runs.
@@ -133,7 +134,7 @@ namespace Pearl
 
             if (useLoadingBar)
             {
-                GameObjectExtend.DestroyGameObject(loadingIstance);
+                GameObjectExtend.DestroyExtend(loadingIstance);
             }
             else
             {

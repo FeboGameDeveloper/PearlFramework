@@ -25,6 +25,9 @@ namespace Pearl.Examples.InspectorExamples
         [ReadOnly]
         public string s = "Hi";
 
+        [Information("error", InformationTypeEnum.Error)]
+        public int error = 3;
+
         public bool b;
         public bool c;
         public int a;

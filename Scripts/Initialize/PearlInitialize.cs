@@ -31,7 +31,7 @@ public class PearlInitialize
                     var gameManager = gameManagerCreation.GameManager;
                     if (gameManager != null)
                     {
-                        GameObjectExtend.CreateGameObject(gameManager);
+                        GameObject.Instantiate(gameManager);
                         create = false;
                     }
                 }
@@ -39,7 +39,7 @@ public class PearlInitialize
 
             if (create)
             {
-                GameObjectExtend.CreateGameObject("GameManager", null, true, typeof(GameManager));
+                GameObjectExtend.CreateGameObject("GameManager", components: typeof(GameManager));
             }
         }
     }

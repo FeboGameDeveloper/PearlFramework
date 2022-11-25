@@ -28,9 +28,9 @@ namespace Pearl.Multitags
         /// <summary>
         /// Searches the gameobjects with tags.
         /// </summary>
-        /// <param name = "only">This bool specifies whether the Gameobject should have only those tags</param>
+        /// <param name = "onlyThoseTags">This bool specifies whether the Gameobject should have only those tags</param>
         /// <param name = "tagsParameter">The tags that must have the object</param>
-        public static GameObject[] FindGameObjectsWithMultiTags(in bool only, params string[] tagsParameter)
+        public static GameObject[] FindGameObjectsWithMultiTags(in bool onlyThoseTags, params string[] tagsParameter)
         {
             if (tagsParameter != null && tagsParameter.Length != 0 && _results != null)
             {
@@ -39,7 +39,7 @@ namespace Pearl.Multitags
                 foreach (MultitagsComponent manager in _listGameObjectsWithTags)
                 {
                     int count = manager.GetCountTag();
-                    if ((!only && count < tagsParameter.Length) || (only && count != tagsParameter.Length))
+                    if ((!onlyThoseTags && count < tagsParameter.Length) || (onlyThoseTags && count != tagsParameter.Length))
                     {
                         continue;
                     }
@@ -59,20 +59,20 @@ namespace Pearl.Multitags
         /// <summary>
         /// Searches a gameobject with these tags.
         /// </summary>
-        /// <param name = "only">This bool specifies whether the Gameobject should have only those tags</param>
+        /// <param name = "onlyThoseTags">This bool specifies whether the Gameobject should have only those tags</param>
         /// <param name = "tagsParameter">The tags that must have the object</param>
-        public static GameObject FindGameObjectWithMultiTags(in bool only, params string[] tagsParameter)
+        public static GameObject FindGameObjectWithMultiTags(in bool onlyThoseTags, params string[] tagsParameter)
         {
-            _auxArrayGameObject = FindGameObjectsWithMultiTags(only, tagsParameter);
+            _auxArrayGameObject = FindGameObjectsWithMultiTags(onlyThoseTags, tagsParameter);
 
             return _auxArrayGameObject != null && _auxArrayGameObject.Length >= 1 ? _auxArrayGameObject[0] : null;
         }
         #endregion
 
         #region Extend Methods
-        public static bool HasTags(this Component @this, in bool only, params string[] tagsParameter)
+        public static bool HasTags(this Component @this, in bool onlyThoseTags, params string[] tagsParameter)
         {
-            return @this ? @this.gameObject.HasTags(only, tagsParameter) : false;
+            return @this ? @this.gameObject.HasTags(onlyThoseTags, tagsParameter) : false;
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Pearl.Multitags
         /// </summary>
         /// <param name = "this">The gameobject</param>
         /// <param name = "tagsParameter">The tags that must have the GameObject</param>
-        public static bool HasTags(this GameObject @this, in bool only, params string[] tagsParameter)
+        public static bool HasTags(this GameObject @this, in bool onlyThoseTags, params string[] tagsParameter)
         {
             if (@this != null && tagsParameter != null)
             {
@@ -92,7 +92,7 @@ namespace Pearl.Multitags
                 }
 
                 auxManager.ForceAwake();
-                return auxManager.HasTags(only, tagsParameter);
+                return auxManager.HasTags(onlyThoseTags, tagsParameter);
             }
             return false;
         }

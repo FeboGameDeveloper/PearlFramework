@@ -236,7 +236,7 @@ namespace Pearl.UI
 
             if (finishQustionEnum == FinishQustionEnum.Destroy)
             {
-                GameObjectExtend.DestroyGameObject(gameObject);
+                GameObjectExtend.DestroyExtend(gameObject);
             }
             else if (finishQustionEnum == FinishQustionEnum.Disactive)
             {

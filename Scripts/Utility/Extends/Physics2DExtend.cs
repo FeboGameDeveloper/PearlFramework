@@ -6,12 +6,13 @@ namespace Pearl
     public static class Physics2DExtend
     {
         private static readonly int myLayer;
+        private const string myLayerString = "AuxLayer";
         private static readonly LayerMask maskInverse;
 
         static Physics2DExtend()
         {
-            maskInverse = LayerExtend.CreateLayerMask("AuxLayer").Inverse();
-            myLayer = LayerMask.NameToLayer("AuxLayer");
+            maskInverse = LayerExtend.CreateLayerMask(myLayerString).Inverse();
+            myLayer = LayerMask.NameToLayer(myLayerString);
         }
 
         #region Velocity
@@ -205,115 +206,6 @@ namespace Pearl
             gameObject.layer = myLayer;
             otherHit = UnityEngine.Physics2D.Raycast(origin, direction, distance, maskInverse);
             gameObject.layer = auxLayer;
-        }
-
-        public static bool LineRayIntersection(out Vector3 intersection, Vector3 rayPoint, Vector3 rayDir, Vector3 linePoint, Vector3 lineDir)
-        {
-            bool ThereIsContact = Math3D.LineLineIntersection(out intersection, linePoint, lineDir, rayPoint, rayDir);
-            if (ThereIsContact)
-            {
-                if (rayDir.x == 0 && rayDir.y > 0)
-                {
-                    return intersection.y >= rayPoint.y;
-                }
-                if (rayDir.x == 0 && rayDir.y < 0)
-                {
-                    return intersection.y <= rayPoint.y;
-                }
-                if (rayDir.x > 0 && rayDir.y == 0)
-                {
-                    return intersection.x >= rayPoint.x;
-                }
-                if (rayDir.x < 0 && rayDir.y == 0)
-                {
-                    return intersection.x <= rayPoint.x;
-                }
-
-
-                if (rayDir.x > 0 && rayDir.y > 0)
-                {
-                    return intersection.x >= rayPoint.x && intersection.y >= rayPoint.y;
-                }
-                if (rayDir.x > 0 && rayDir.y < 0)
-                {
-                    return intersection.x >= rayPoint.x && intersection.y <= rayPoint.y;
-                }
-                if (rayDir.x < 0 && rayDir.y > 0)
-                {
-                    return intersection.x <= rayPoint.x && intersection.y >= rayPoint.y;
-                }
-                if (rayDir.x < 0 && rayDir.y < 0)
-                {
-                    return intersection.x <= rayPoint.x && intersection.y <= rayPoint.y;
-                }
-
-            }
-            return false;
-        }
-
-        public static bool RayCasterInsideColliderWithBoundsWithoutGameObject(GameObject gameObject, float angle, ref int index, ref Vector3 interactPoint, in Vector2 initPosition, in Vector2 sizeBox, in Vector2 translationVector)
-        {
-            int auxIndex = -1;
-            Vector3 auxVector1 = Vector3.zero;
-            Vector3 auxVector2 = Vector3.zero;
-            RaycastHit2D[] hits;
-
-            Physics2DExtend.BoxCastAllWithoutGameObject(gameObject, out hits, initPosition, sizeBox, angle, Vector2.zero, 0);
-            for (int i = 0; i < hits.Length; i++)
-            {
-                if (hits[i].collider.isTrigger)
-                {
-                    auxIndex = i;
-                    break;
-                }
-            }
-
-            if (auxIndex == -1)
-            {
-                return false;
-            }
-            else
-            {
-                index = auxIndex;
-                if (translationVector.x > 0)
-                    auxVector1 = new Vector2(hits[auxIndex].collider.bounds.max.x, hits[0].collider.bounds.min.y);
-                else if (translationVector.x < 0)
-                    auxVector1 = new Vector2(hits[auxIndex].collider.bounds.min.x, hits[0].collider.bounds.min.y);
-
-                if (translationVector.y > 0)
-                    auxVector2 = new Vector2(hits[auxIndex].collider.bounds.min.x, hits[0].collider.bounds.max.y);
-                else if (translationVector.y < 0)
-                    auxVector2 = new Vector2(hits[auxIndex].collider.bounds.min.x, hits[0].collider.bounds.min.y);
-            }
-
-            Physics2DExtend.BoxCastAllWithoutGameObject(gameObject, out hits, initPosition + translationVector, sizeBox, angle, Vector2.zero, 0);
-            if (hits.Length != 0)
-            {
-                return false;
-            }
-            if (translationVector.y == 0)
-            {
-                Math3D.LineLineIntersection(out interactPoint, initPosition, translationVector, auxVector1, Vector2.up);
-
-            }
-            else if (translationVector.x == 0)
-            {
-                Math3D.LineLineIntersection(out interactPoint, initPosition, translationVector, auxVector2, Vector2.right);
-            }
-            else
-            {
-                Math3D.LineLineIntersection(out auxVector1, initPosition, translationVector, auxVector1, Vector2.up);
-                Math3D.LineLineIntersection(out auxVector2, initPosition, translationVector, auxVector2, Vector2.right);
-                if (Vector3.Distance(initPosition, auxVector1) > Vector3.Distance(initPosition, auxVector2))
-                {
-                    interactPoint = auxVector2;
-                }
-                else
-                {
-                    interactPoint = auxVector1;
-                }
-            }
-            return true;
         }
     }
 }

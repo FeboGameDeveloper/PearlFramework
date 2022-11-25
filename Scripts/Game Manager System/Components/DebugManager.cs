@@ -42,7 +42,7 @@ namespace Pearl
 #if STOMPYROBOT
             if (tunning)
             {
-                GameObjectExtend.CreateGameObject(tunning, out _, transform, true);
+                GameObjectExtend.CreateGameObject(tunning, out _, parent: transform, onlyInTheScene: true);
             }
 #endif
 
@@ -71,7 +71,7 @@ namespace Pearl
                 {
                     if (isActive)
                     {
-                        GameObjectExtend.CreateUIlement(frameRatePrefab, out _, CanvasTipology.Debug);
+                        GameObjectExtend.CreateUIlement(frameRatePrefab, out _, canvasTipology: CanvasTipology.Debug);
                     }
 
                     if (frameRateManager)

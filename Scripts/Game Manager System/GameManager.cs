@@ -1,6 +1,7 @@
 ﻿using Pearl.Audio;
 using Pearl.Events;
 using Pearl.Storage;
+using Pearl.UI;
 using System;
 using TypeReferences;
 using UnityEngine;
@@ -59,17 +60,13 @@ namespace Pearl
         #region Inspector Fields
         [Header("General setting")]
 
-        [SerializeField]
-        [Tooltip("Game Name")]
-        [ReadOnly]
+        [ReadOnly, SerializeField, Tooltip("Game Name")]
         private string gameName = "Game";
 
-        [SerializeField]
-        [ClassImplements(typeof(GameVersionManager))]
+        [SerializeField, ClassImplements(typeof(GameVersionManager))]
         public ClassTypeReference versionType;
 
-        [SerializeField]
-        [ReadOnly]
+        [ReadOnly, SerializeField]
         private string gameVersionString;
 
         [SerializeField]
@@ -80,8 +77,7 @@ namespace Pearl
 
         [Header("Components")]
 
-        [InterfaceType(typeof(IFSM))]
-        [SerializeField]
+        [SerializeField, InterfaceType(typeof(IFSM))]
         protected UnityEngine.Object FSMObject = null;
 
         [Header("Prefabs")]
@@ -148,12 +144,12 @@ namespace Pearl
 
             if (canvasPrefab)
             {
-                GameObjectExtend.CreateGameObject(canvasPrefab, out _, true);
+                GameObjectExtend.CreateGameObject(canvasPrefab, out _, onlyInTheScene: true);
             }
 
             if (blackPagePrefab)
             {
-                GameObjectExtend.CreateUIlement<BlackPageManager>(blackPagePrefab, out _blackPageManager, UI.CanvasTipology.UI, ChangeTypeEnum.Modify, true);
+                GameObjectExtend.CreateUIlement<BlackPageManager>(blackPagePrefab, out _blackPageManager, canvasTipology: CanvasTipology.UI, onlyInTheScene: true); ;
                 if (_blackPageManager)
                 {
                     _blackPageManager.Disappear();

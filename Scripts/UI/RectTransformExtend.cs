@@ -174,6 +174,15 @@ namespace Pearl.UI
             }
             return visibleCorners;
         }
+
+        public static Rect RectTransformToScreenSpace(this RectTransform @this)
+        {
+            Vector2 size = Vector2.Scale(@this.rect.size, @this.lossyScale);
+            float x = @this.position.x + @this.anchoredPosition.x;
+            float y = Screen.height - @this.position.y - @this.anchoredPosition.y;
+
+            return new Rect(x, y, size.x, size.y);
+        }
     }
 }
 

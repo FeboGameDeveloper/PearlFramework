@@ -8,11 +8,11 @@ namespace Pearl.Examples.TagsExample
         // Start is called before the first frame update
         void Start()
         {
-            var a = GameObjectExtend.FindGameObjectWithMultiTags(true, "enemy");
+            var a = MultiTagsManager.FindGameObjectWithMultiTags(true, "enemy");
             UnityEngine.Debug.Log(a);
-            a = GameObjectExtend.FindGameObjectWithMultiTags(false, "enemy");
+            a = MultiTagsManager.FindGameObjectWithMultiTags(false, "enemy");
             UnityEngine.Debug.Log(a);
-            a = GameObjectExtend.FindGameObjectWithMultiTags(true, "enemy", "player");
+            a = MultiTagsManager.FindGameObjectWithMultiTags(true, "enemy", "player");
             UnityEngine.Debug.Log(a);
             UnityEngine.Debug.Log(a.GetTags().PrintElements());
             UnityEngine.Debug.Log(a.HasTags(true, "player"));

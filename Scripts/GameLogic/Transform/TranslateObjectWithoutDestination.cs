@@ -88,7 +88,7 @@ namespace Pearl
             _timer.ResetOff();
             if (destoryAtFinish)
             {
-                GameObjectExtend.DestroyGameObject(gameObject);
+                GameObjectExtend.DestroyExtend(gameObject);
             }
         }
     }

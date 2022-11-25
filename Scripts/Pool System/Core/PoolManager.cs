@@ -13,7 +13,7 @@ namespace Pearl.Pools
         #region static
 
         #region public Fields
-        public const string elementPool = "elementPool";
+        public const string poolElement = "elementPool";
         #endregion
 
         #region Private Fields
@@ -43,7 +43,7 @@ namespace Pearl.Pools
                 }
 
                 GameObject container = FindContainer(dontDestoryAtLoad);
-                var pool = GameObjectExtend.CreateGameObject<PoolManager>(prefab.name + "Pool", false, container.transform);
+                PoolManager pool = GameObjectExtend.CreateGameObject<PoolManager>(prefab.name + "Pool", container.transform);
 
                 if (pool == null)
                 {
@@ -163,7 +163,7 @@ namespace Pearl.Pools
         private static GameObject FindContainer(bool dontDestoryAtLoad = false)
         {
             string namePool = dontDestoryAtLoad ? poolContainerStaticName : poolContainerName;
-            GameObject container = GameObjectExtend.FindGameObjectWithMultiTags(true, namePool);
+            GameObject container = MultiTagsManager.FindGameObjectWithMultiTags(true, namePool);
             if (!container)
             {
                 container = new(namePool, typeof(MultitagsComponent));
@@ -376,7 +376,7 @@ namespace Pearl.Pools
         private void IstantiateNewObject()
         {
             GameObjectExtend.CreateGameObject(_prefab, out auxGameobject, _prefab.name, Vector3.zero, Quaternion.identity, gameObject.transform);
-            auxGameobject.AddTags(PoolManager.elementPool);
+            auxGameobject.AddTags(PoolManager.poolElement);
             Disable(auxGameobject);
         }
         #endregion

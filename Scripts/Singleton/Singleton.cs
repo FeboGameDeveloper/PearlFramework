@@ -28,7 +28,7 @@ namespace Pearl
 
                     if (m_Instance == null && create != CreateSingletonEnum.Null)
                     {
-                        m_Instance = GameObjectExtend.CreateGameObjectWithComponent<T>(typeof(T).Name);
+                        m_Instance = GameObjectExtend.CreateGameObject<T>(typeof(T).Name);
                         if (m_Instance != null && create == CreateSingletonEnum.CreateStatic)
                         {
                             GameObject.DontDestroyOnLoad(m_Instance);
@@ -58,7 +58,7 @@ namespace Pearl
             return result != null;
         }
 
-        public static bool GetIstance(out T result, in string path, bool dontDstoryAtLoad, in string root = null, in bool repeatSearch = false)
+        public static bool GetIstance(out T result, in string path, bool dontDestroyAtLoad, in string root = null, in bool repeatSearch = false)
         {
             if (Singleton<T>.GetIstance(out result, CreateSingletonEnum.Null, root, repeatSearch))
             {
@@ -66,7 +66,7 @@ namespace Pearl
             }
             else
             {
-                return GameObjectExtend.CreateGameObjectFromBindings<T>(path, out result, typeof(T).Name, dontDstoryAtLoad);
+                return GameObjectExtend.CreateGameObjectFromBindings<T>(path, out result, typeof(T).Name, dontDestroyAtLoad: dontDestroyAtLoad);
             }
         }
         #endregion

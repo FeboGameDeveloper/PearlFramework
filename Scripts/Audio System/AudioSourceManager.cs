@@ -145,7 +145,7 @@ namespace Pearl
 
         public void DestroyAudioSource()
         {
-            GameObjectExtend.DestroyGameObject(gameObject);
+            GameObjectExtend.DestroyExtend(gameObject);
         }
 
         public void Play()

@@ -10,7 +10,7 @@ namespace Pearl.Storage
         #region Save
         public static void SaveAll(bool saveInHardDisk = true)
         {
-            var list = GameObjectExtend.FindInterfaces<IStoragePlayerPrefs>();
+            var list = GameObjectExtend.FindAllInterfaces<IStoragePlayerPrefs>();
             foreach (var mono in list)
             {
                 Save(mono, false);
@@ -100,7 +100,7 @@ namespace Pearl.Storage
         #region Load
         public static void LoadAll()
         {
-            var list = GameObjectExtend.FindInterfaces<IStoragePlayerPrefs>();
+            var list = GameObjectExtend.FindAllInterfaces<IStoragePlayerPrefs>();
             foreach (var mono in list)
             {
                 Load(mono);

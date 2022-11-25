@@ -164,5 +164,11 @@ namespace Pearl
             return returnBounds;
         }
 
+        private static void GetRotateBounds(Bounds bounds, Quaternion rotation)
+        {
+            Vector3 center = bounds.center;
+            float minX = bounds.min.x;
+        }
+
     }
 }

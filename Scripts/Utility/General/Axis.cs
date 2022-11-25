@@ -35,6 +35,24 @@ namespace Pearl
         Down,
     }
 
+    public enum SemiAxisX
+    {
+        Left,
+        Right,
+    }
+
+    public enum SemiAxisY
+    {
+        Up,
+        Down,
+    }
+
+    public enum SemiAxisZ
+    {
+        Forward,
+        Back,
+    }
+
     public enum Axis3DEnum
     {
         X,
@@ -44,12 +62,12 @@ namespace Pearl
 
     public enum SemiAxis3DEnum
     {
-        left,
-        right,
-        up,
-        down,
-        forward,
-        back,
+        Left,
+        Right,
+        Up,
+        Down,
+        Forward,
+        Back,
     }
 
     public static class AxisDictonary

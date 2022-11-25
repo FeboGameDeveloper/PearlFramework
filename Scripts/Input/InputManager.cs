@@ -125,7 +125,7 @@ namespace Pearl.Input
         #endregion
 
         #region Map
-        public void SetSwitchMap(in string newMapName, bool UIEnable = true)
+        public static void SetSwitchMap(in string newMapName, bool UIEnable = true)
         {
             var inputInterface = Get(0);
             if (inputInterface != null)
@@ -324,7 +324,7 @@ namespace Pearl.Input
 
             if (eventSystemPrefab && !GameObject.FindObjectOfType<InputSystemUIInputModule>())
             {
-                GameObjectExtend.CreateGameObject(eventSystemPrefab, out _, true);
+                GameObjectExtend.CreateGameObject(eventSystemPrefab, out _, onlyInTheScene: true);
             }
 
             for (int i = 0; i < playersAtStart; i++)

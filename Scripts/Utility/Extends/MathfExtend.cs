@@ -25,14 +25,19 @@ namespace Pearl
             return Mathf.Sqrt(f);
         }
 
-        public static bool ApproxZero(this float f)
+        public static bool ApproxZero(this float a)
         {
-            return Mathf.Approximately(0, f);
+            return Mathf.Approximately(0, a);
         }
 
-        public static bool Approx(this float f, float f2)
+        public static bool Approximately(this float a, float b)
         {
-            return Mathf.Approximately(f, f2);
+            return Mathf.Approximately(a, b);
+        }
+
+        public static bool Tolerance(this float a, float b, float tolerance = 1e-5f)
+        {
+            return Mathf.Abs(a - b) <= tolerance;
         }
 
         /// <summary>
@@ -380,8 +385,21 @@ namespace Pearl
             }
         }
 
-        public static bool IsContains(this float value, float min, float max, bool includeMin = true, bool includeMax = true)
+        public static bool IsContains(this float value, float a, float b, bool includeMin = true, bool includeMax = true)
         {
+            float max;
+            float min;
+            if (a > b)
+            {
+                max = a;
+                min = b;
+            }
+            else
+            {
+                min = a;
+                max = b;
+            }
+
             if (includeMax && includeMin)
             {
                 return value >= min && value <= max;
@@ -400,8 +418,21 @@ namespace Pearl
             }
         }
 
-        public static bool IsContains(this int value, int min, int max, bool includeMin = true, bool includeMax = true)
+        public static bool IsContains(this int value, int a, int b, bool includeMin = true, bool includeMax = true)
         {
+            int max;
+            int min;
+            if (a > b)
+            {
+                max = a;
+                min = b;
+            }
+            else
+            {
+                min = a;
+                max = b;
+            }
+
             if (includeMax && includeMin)
             {
                 return value >= min && value <= max;

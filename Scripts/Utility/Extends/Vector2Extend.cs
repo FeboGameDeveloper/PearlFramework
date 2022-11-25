@@ -31,6 +31,11 @@ namespace Pearl
             return vector;
         }
 
+        public static float CrossProduct2D(Vector2 a, Vector2 b)
+        {
+            return a.x * b.y - b.x * a.y;
+        }
+
         public static Vector2 ChangeVector(this Vector2 vector, Axis2DEnum axisEnum, float newValue, ChangeTypeEnum changeTypeTransform, Vector2 range = default)
         {
             range = range == Vector2.zero ? new Vector2(float.MinValue, float.MaxValue) : range;
@@ -53,7 +58,7 @@ namespace Pearl
 
         public static bool Approx(Vector2 vectorA, Vector2 vectorB)
         {
-            return vectorA.x.Approx(vectorB.x) && vectorA.y.Approx(vectorB.y);
+            return vectorA.x.Approximately(vectorB.x) && vectorA.y.Approximately(vectorB.y);
         }
 
 

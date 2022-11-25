@@ -36,6 +36,33 @@ namespace Pearl.Input
         }
     }
 
+    [Serializable]
+    public struct InfoInputButton
+    {
+        public string nameInput;
+        public StateButton stateButton;
+
+        public InfoInputButton(string nameInput, StateButton stateButton)
+        {
+            this.nameInput = nameInput;
+            this.stateButton = stateButton;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is InfoInputButton infoButton)
+            {
+                return infoButton.nameInput == nameInput && infoButton.stateButton == stateButton;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(nameInput, stateButton);
+        }
+    }
+
     public class InputInterface : PearlBehaviour
     {
         private class InputState
@@ -85,32 +112,6 @@ namespace Pearl.Input
                 public override int GetHashCode()
                 {
                     return HashCode.Combine(inputActonString, stateButton);
-                }
-            }
-
-            public struct InfoInputButton
-            {
-                public string nameInput;
-                public StateButton stateButton;
-
-                public InfoInputButton(string nameInput, StateButton stateButton)
-                {
-                    this.nameInput = nameInput;
-                    this.stateButton = stateButton;
-                }
-
-                public override bool Equals(object obj)
-                {
-                    if (obj is InfoInputButton infoButton)
-                    {
-                        return infoButton.nameInput == nameInput && infoButton.stateButton == stateButton;
-                    }
-                    return false;
-                }
-
-                public override int GetHashCode()
-                {
-                    return HashCode.Combine(nameInput, stateButton);
                 }
             }
             #endregion

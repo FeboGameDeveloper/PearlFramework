@@ -125,7 +125,7 @@ namespace Pearl
                     ResetTranslation();
                     if (destroyAtFinish)
                     {
-                        GameObjectExtend.DestroyGameObject(gameObject);
+                        GameObjectExtend.DestroyExtend(gameObject);
                     }
                 }
 

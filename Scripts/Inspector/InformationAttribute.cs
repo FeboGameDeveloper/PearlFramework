@@ -23,6 +23,10 @@ namespace Pearl
             if (type == InformationTypeEnum.None) { this.Type = UnityEditor.MessageType.None; }
             this.MessageAfterProperty = messageAfterProperty;
         }
+
+        public InformationAttribute(string message, InformationTypeEnum type) : this(message, type, false)
+        {
+        }
 #else
 		public InformationAttribute(string message, InformationTypeEnum type, bool messageAfterProperty)
 		{

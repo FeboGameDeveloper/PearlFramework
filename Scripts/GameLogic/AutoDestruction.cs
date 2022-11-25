@@ -42,7 +42,7 @@ namespace Pearl
 
         private void OnFinishTime(TimerContainer container, float left, float right)
         {
-            GameObjectExtend.DestroyGameObject(gameObject);
+            GameObjectExtend.DestroyExtend(gameObject);
         }
     }
 }

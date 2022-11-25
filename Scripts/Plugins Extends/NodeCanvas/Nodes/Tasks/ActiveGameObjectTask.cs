@@ -26,7 +26,7 @@ namespace Pearl.NodeCanvas.Tasks
                 gameObject.SetActive(active);
                 if (!active && destroy.IsExist(out var value) && value)
                 {
-                    GameObjectExtend.DestroyGameObject(gameObject);
+                    GameObjectExtend.DestroyExtend(gameObject);
                 }
             }
 

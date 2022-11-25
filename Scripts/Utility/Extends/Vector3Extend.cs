@@ -58,7 +58,7 @@ namespace Pearl
 
         public static bool Approx(Vector3 vectorA, Vector3 vectorB)
         {
-            return vectorA.x.Approx(vectorB.x) && vectorA.y.Approx(vectorB.y) && vectorA.z.Approx(vectorB.z);
+            return vectorA.x.Approximately(vectorB.x) && vectorA.y.Approximately(vectorB.y) && vectorA.z.Approximately(vectorB.z);
         }
 
         public static Vector3 Clamp(Vector3 vector, Range rangeX)

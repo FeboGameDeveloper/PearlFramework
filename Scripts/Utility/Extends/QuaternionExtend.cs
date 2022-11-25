@@ -54,7 +54,7 @@ namespace Pearl
             transform.RotateAround(center.position, Vector3.forward, angle);
         }
 
-        public static Vector3 RotationByCenter(Vector3 position, Vector3 center, float angle)
+        public static Vector3 RotationByCenter(Vector3 center, Vector3 position, float angle)
         {
             Vector3 diff = (position - center);
 

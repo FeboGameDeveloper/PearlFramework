@@ -344,7 +344,7 @@ namespace Pearl
                             }
                             else
                             {
-                                if (!GetFieldOrPropertyOrMethod(container, fieldName, out container))
+                                if (!GetValue(container, fieldName, out container))
                                 {
                                     break;
                                 }
@@ -430,11 +430,11 @@ namespace Pearl
             return false;
         }
 
-        public static bool GetField<T>(object container, string name, out T result)
+        public static bool GetField<T>(object container, string name, out T result, BindingFlags bindingFlags = FLAGS_ALL)
         {
             if (container != null && name != null)
             {
-                GetFieldPrivate(container, name, out object var);
+                GetFieldPrivate(container, name, out object var, bindingFlags);
                 if (var != null && var is T tVar)
                 {
                     result = tVar;
@@ -445,16 +445,16 @@ namespace Pearl
             return false;
         }
 
-        public static bool GetField<Type>(string name, out object result)
+        public static bool GetField<Type>(string name, out object result, BindingFlags bindingFlags = FLAGS_ALL)
         {
             object container = GameObject.FindObjectOfType(typeof(Type));
 
-            return GetFieldPrivate(container, name, out result);
+            return GetFieldPrivate(container, name, out result, bindingFlags);
         }
 
-        public static bool GetField<Result, Type>(string name, out Result result)
+        public static bool GetField<Result, Type>(string name, out Result result, BindingFlags bindingFlags = FLAGS_ALL)
         {
-            GetField<Type>(name, out object var);
+            GetField<Type>(name, out object var, bindingFlags);
             if (var != null && var is Result tVar)
             {
                 result = tVar;
@@ -559,26 +559,46 @@ namespace Pearl
         }
 
         #region GetFieldOrProperty
-        public static bool GetFieldOrPropertyOrMethod(object container, string name, out object result, BindingFlags bindingFlags = FLAGS_ALL)
+        public static bool GetValue(object container, string name, out object result, BindingFlags bindingFlags = FLAGS_ALL)
         {
-            bool isGet = GetField(container, name, out result);
-            if (!isGet)
-            {
-                isGet = GetProperty(container, name, out result);
-            }
-            if (!isGet)
-            {
-                isGet = UseMethodWithResult<object>(container, name, out result);
-            }
-
-            return isGet;
+            return GetValue(container, name, out result, MemberEnum.Either, bindingFlags);
         }
 
-        public static bool GetFieldOrPropertyOrMethod<T>(object container, string name, out T result, BindingFlags bindingFlags = FLAGS_ALL)
+        public static bool GetValue(object container, string name, out object result, MemberEnum memberEnum, BindingFlags bindingFlags = FLAGS_ALL)
+        {
+            if (memberEnum == MemberEnum.Either)
+            {
+                bool isGet = GetField(container, name, out result, bindingFlags);
+                if (!isGet)
+                {
+                    isGet = GetProperty(container, name, out result, bindingFlags);
+                }
+                if (!isGet)
+                {
+                    isGet = UseMethodWithResult<object>(container, name, out result, bindingFlags);
+                }
+
+                return isGet;
+            }
+            else if (memberEnum == MemberEnum.Field)
+            {
+                return GetField(container, name, out result, bindingFlags);
+            }
+            else if (memberEnum == MemberEnum.Field)
+            {
+                return GetProperty(container, name, out result, bindingFlags);
+            }
+            else
+            {
+                return UseMethodWithResult<object>(container, name, out result, bindingFlags);
+            }
+        }
+
+        public static bool GetValue<T>(object container, string name, out T result, BindingFlags bindingFlags = FLAGS_ALL)
         {
             if (container != null && name != null)
             {
-                GetFieldOrPropertyOrMethod(container, name, out object var);
+                GetValue(container, name, out object var);
                 if (var != null && var is T tVar)
                 {
                     result = tVar;
@@ -589,16 +609,16 @@ namespace Pearl
             return false;
         }
 
-        public static bool GetFieldOrProperty<Type>(string name, out object result, BindingFlags bindingFlags = FLAGS_ALL)
+        public static bool GetValue<Type>(string name, out object result, BindingFlags bindingFlags = FLAGS_ALL)
         {
             object container = GameObject.FindObjectOfType(typeof(Type));
 
-            return GetFieldOrPropertyOrMethod(container, name, out result);
+            return GetValue(container, name, out result, bindingFlags);
         }
 
-        public static bool GetFieldOrProperty<Result, Type>(object container, string name, out Result result, BindingFlags bindingFlags = FLAGS_ALL)
+        public static bool GetValue<Result, Type>(object container, string name, out Result result, BindingFlags bindingFlags = FLAGS_ALL)
         {
-            GetFieldOrProperty<Type>(name, out object var);
+            GetValue<Type>(name, out object var, bindingFlags);
             if (var != null && var is Result tVar)
             {
                 result = tVar;
@@ -622,7 +642,7 @@ namespace Pearl
         }
         #endregion
 
-        public static void SetStaticFieldOrPropertyOrMethod<T>(Type type, T value, string propertyName, BindingFlags bindingFlags = FLAGS_ALL)
+        public static void SetStaticValue<T>(Type type, T value, string propertyName, BindingFlags bindingFlags = FLAGS_ALL)
         {
             MemberInfo member = type.GetProperty(propertyName, bindingFlags);
             if (member == null)
@@ -643,7 +663,7 @@ namespace Pearl
 
         public static void GetCollectionsElement(object container, string name, int index, out object result, BindingFlags bindingFlags = FLAGS_ALL)
         {
-            if (ReflectionExtend.GetFieldOrPropertyOrMethod(container, name, out result))
+            if (ReflectionExtend.GetValue(container, name, out result))
             {
                 if (result is IEnumerable enumerable)
                 {
@@ -766,16 +786,16 @@ namespace Pearl
             {
                 if (parameter.staticMember == FuzzyBoolean.Yes)
                 {
-                    SetStaticFieldOrPropertyOrMethod(container.GetType(), parameter.value, parameter.name);
+                    SetStaticValue(container.GetType(), parameter.value, parameter.name);
                 }
                 else
                 {
-                    SetFieldOrPropertyOrMethod(container, parameter.name, parameter.value, bindingFlags);
+                    SetValue(container, parameter.name, parameter.value, bindingFlags);
                 }
             }
         }
 
-        public static bool SetFieldOrPropertyOrMethod(object container, string name, object newValue, BindingFlags bindingFlags = FLAGS_ALL)
+        public static bool SetValue(object container, string name, object newValue, BindingFlags bindingFlags = FLAGS_ALL)
         {
             bool isSet = SetField(container, name, newValue, bindingFlags);
             if (!isSet)

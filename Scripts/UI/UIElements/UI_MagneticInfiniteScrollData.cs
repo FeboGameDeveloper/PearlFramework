@@ -83,7 +83,7 @@ namespace Pearl.UI
 
             foreach (var info in content)
             {
-                GameObjectExtend.CreateUIlement(prefab, out GameObject obj, CanvasTipology.Null);
+                GameObjectExtend.CreateUIlement(prefab, out GameObject obj, canvasTipology: CanvasTipology.Null);
 
                 var element = obj.GetComponent<IElement<T, F>>();
                 if (element != null)

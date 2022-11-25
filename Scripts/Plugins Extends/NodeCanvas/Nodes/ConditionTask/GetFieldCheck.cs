@@ -2,6 +2,7 @@
 
 using NodeCanvas.Framework;
 using ParadoxNotion.Design;
+using System;
 using UnityEngine;
 
 namespace Pearl.NodeCanvas.Tasks.Conditions
@@ -16,33 +17,46 @@ namespace Pearl.NodeCanvas.Tasks.Conditions
         [Conditional("useAgent", 0)]
         public BBParameter<string> nameRoot = default;
 
+        public BBParameter<MemberEnum> memberTypeBB = MemberEnum.Either;
+
         public BBParameter<string> nameField = default;
 
-        [Conditional("primitiveStruct", (int)PrimitiveEnum.Bool)]
-        public BBParameter<bool> boolValue = default;
-
-        [Conditional("primitiveStruct", (int)PrimitiveEnum.Enum)]
-        public BBParameter<string> enumValue = default;
-
-        [Conditional("primitiveStruct", (int)PrimitiveEnum.Float)]
-        public BBParameter<float> floatValue = default;
-
-        [Conditional("primitiveStruct", (int)PrimitiveEnum.Integer)]
-        public BBParameter<int> integerValue = default;
-
-        [Conditional("primitiveStruct", (int)PrimitiveEnum.String)]
-        public BBParameter<string> stringValue = default;
-
-        [Conditional("primitiveStruct", (int)PrimitiveEnum.Vector2)]
-        public BBParameter<Vector2> vector2Value = default;
-
-        [Conditional("primitiveStruct", (int)PrimitiveEnum.Vector3)]
-        public BBParameter<Vector3> vector3Value = default;
-
-        protected override string info { get { return "[" + "]"; } }
+        protected override string info { get { return "[" + nameField.value + "]"; } }
 
         protected override bool OnCheck()
         {
+            if (useAgent == null || nameClass == null)
+            {
+                return false;
+            }
+
+            GameObject obj;
+            if (!useAgent.value && nameRoot != null)
+            {
+                string root = nameRoot.value;
+                obj = GameObject.Find(root);
+            }
+            else
+            {
+                obj = agent.gameObject;
+            }
+
+            Type type = nameClass.value.GetTypeFromName();
+
+            if (obj != null)
+            {
+                Component component = obj.GetChildInHierarchy(type);
+                MemberEnum memberType = memberTypeBB != null ? memberTypeBB.value : MemberEnum.Either;
+                if (component != null)
+                {
+                    ReflectionExtend.GetValue(component, nameField.value, out var result, memberType);
+                    if (result != null && result is Boolean boolResult)
+                    {
+                        return boolResult;
+                    }
+                }
+            }
+
             return false;
         }
     }

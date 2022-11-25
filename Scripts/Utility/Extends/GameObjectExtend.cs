@@ -14,74 +14,47 @@ namespace Pearl
     /// </summary>
     public static class GameObjectExtend
     {
-
-        public static T[] GetComponentsInParent<T>(this GameObject @this, bool excludeMySelf, bool includeInactive)
+        #region Get
+        public static T[] GetComponentsInParent<T>(this GameObject @this, bool excludeMySelf, bool includeInactive) where T : Component
         {
             if (@this == null)
             {
                 return null;
             }
 
-            var components = @this.GetComponentsInParent<T>(includeInactive);
+            GameObject container = excludeMySelf ? @this.transform.parent.gameObject : @this;
 
-            if (components == null)
+            if (container == null)
             {
                 return null;
             }
 
-            var list = components.ToList();
-            var ownerComponents = @this.GetComponents<T>();
-
-            if (excludeMySelf && ownerComponents != null)
-            {
-                list.Remove(ownerComponents);
-            }
-
-            return list.ToArray();
+            return container.GetComponentsInParent<T>(includeInactive);
         }
-
-        public static T FindGameObjectWithTag<T>(string tag)
-        {
-            var obj = GameObject.FindGameObjectWithTag(tag);
-            if (obj != null)
-            {
-                return obj.GetComponent<T>();
-            }
-            return default;
-        }
-
-        public static void DestroyOnLoad(GameObject obj)
-        {
-            if (obj != null && obj.transform.parent == null)
-            {
-                SceneManager.MoveGameObjectToScene(obj, SceneManager.GetActiveScene());
-            }
-        }
+        #endregion
 
 
         #region Equals
-        public static bool IsEqual(GameObject aux1, GameObject aux2, StringTypeControl tagType)
+        public static bool IsEqual(this GameObject @this, GameObject aux, StringTypeControl tagType)
         {
-            if (aux1 != null && aux2 != null)
+            if (@this != null && aux != null)
             {
                 if (tagType == StringTypeControl.Name)
                 {
-                    return aux2.name == aux1.name;
+                    return aux.name == @this.name;
                 }
-                if (tagType == StringTypeControl.Layer)
+                else if (tagType == StringTypeControl.Layer)
                 {
-                    return aux2.layer == aux1.layer;
+                    return aux.layer == @this.layer;
                 }
-                if (tagType == StringTypeControl.Tag)
+                else if (tagType == StringTypeControl.Tag)
                 {
-                    return aux1.CompareTag(aux2.tag);
+                    return @this.CompareTag(aux.tag);
                 }
-                if (tagType == StringTypeControl.Tags)
+                else if (tagType == StringTypeControl.Tags)
                 {
-                    return aux1.GetTags().SequenceEqual(aux2.GetTags());
+                    return @this.GetTags().SequenceEqual(aux.GetTags());
                 }
-
-                return aux2.layer == aux1.layer;
             }
 
             return false;
@@ -90,19 +63,38 @@ namespace Pearl
         #endregion
 
         #region Find
+        public static T FindGameObjectWithTag<T>(string tag) where T : Component
+        {
+            var obj = GameObject.FindGameObjectWithTag(tag);
+            return obj != null ? obj.GetComponent<T>() : null;
+        }
+
+        public static T[] FindOtherObjectsOfType<T>(this GameObject @this) where T : Component
+        {
+            if (@this != null)
+            {
+                List<T> list = new(GameObject.FindObjectsOfType<T>());
+                if (list != null)
+                {
+                    list.Remove(list.Find(x => x.gameObject.GetInstanceID() == @this.GetInstanceID()));
+                    return list.ToArray();
+                }
+            }
+            return null;
+        }
+
         public static T Find<T>(in string name) where T : Component
         {
             GameObject obj = GameObject.Find(name);
             return obj != null ? obj.GetComponent<T>() : null;
         }
 
-        public static T Find<T>(in string name, in Type type) where T : Component
+        public static GameObject Find(StringTypeControl tagType, string key)
         {
-            GameObject obj = GameObject.Find(name);
-            return obj != null ? (T)obj.GetComponent(type) : null;
+            return Find(tagType, ArrayExtend.CreateArray(key), true);
         }
 
-        public static GameObject Find(StringTypeControl tagType, string[] keys, bool isEquals = false)
+        public static GameObject Find(StringTypeControl tagType, string[] keys, bool onlyThoseTags = false)
         {
             GameObject result = null;
             if (tagType == StringTypeControl.Tag)
@@ -129,7 +121,7 @@ namespace Pearl
             }
             else if (tagType == StringTypeControl.Tags)
             {
-                result = MultiTagsManager.FindGameObjectWithMultiTags(isEquals, keys);
+                result = MultiTagsManager.FindGameObjectWithMultiTags(onlyThoseTags, keys);
             }
             else if (tagType == StringTypeControl.Layer)
             {
@@ -157,32 +149,19 @@ namespace Pearl
             return result;
         }
 
-        public static T Find<T>(StringTypeControl tagType, string[] keys, bool isEquals = false) where T : Component
+        public static T Find<T>(StringTypeControl tagType, string key) where T : Component
         {
-            GameObject obj = Find(tagType, keys, isEquals);
+            GameObject obj = Find(tagType, key);
             return obj != null ? obj.GetComponent<T>() : default;
         }
 
-        public static T Find<T>(StringTypeControl tagType, Type type, string[] keys) where T : Component
+        public static T Find<T>(StringTypeControl tagType, string[] keys, bool onlyThoseTags = false) where T : Component
         {
-            GameObject obj = Find(tagType, keys);
-            return obj != null ? (T)obj.GetComponent(type) : null;
+            GameObject obj = Find(tagType, keys, onlyThoseTags);
+            return obj != null ? obj.GetComponent<T>() : default;
         }
 
-        public static T FindWithType<T>(string typeString, string assembly = null) where T : Component
-        {
-            Type type = ReflectionExtend.GetType(typeString, assembly);
-            return (T)GameObject.FindObjectOfType(type);
-        }
-
-        public static T Find<T>(StringTypeControl tagType, string typeString, string[] keys, string assembly = null) where T : Component
-        {
-            Type type = ReflectionExtend.GetType(typeString, assembly);
-            GameObject obj = Find(tagType, keys);
-            return obj != null && type != null ? (T)obj.GetComponent(type) : null;
-        }
-
-        public static GameObject FindInHierarchy(StringTypeControl tagType, string[] keys, Transform root, bool includeInactive, bool isEquals = false)
+        public static GameObject FindInHierarchy(StringTypeControl tagType, string[] keys, Transform root, bool includeInactive, bool onlyThoseTags = false)
         {
             if (root == null)
             {
@@ -206,7 +185,7 @@ namespace Pearl
                 }
                 else if (tagType == StringTypeControl.Tags)
                 {
-                    if (tr.HasTags(isEquals, keys))
+                    if (tr.HasTags(onlyThoseTags, keys))
                     {
                         return tr.gameObject;
                     }
@@ -237,20 +216,33 @@ namespace Pearl
             return null;
         }
 
-        public static T FindInHierarchy<T>(in string rootString, in string gameobjectString) where T : Component
+        public static GameObject FindInHierarchy(StringTypeControl tagType, string key, Transform root, bool includeInactive)
         {
-            GameObject obj = FindInHierarchy(rootString, gameobjectString);
-            return obj != null ? obj.GetComponent<T>() : null;
+            return FindInHierarchy(tagType, ArrayExtend.CreateArray(key), root, includeInactive, true);
+        }
+
+        public static T FindInHierarchy<T>(StringTypeControl tagType, string[] keys, Transform root, bool includeInactive, bool onlyThoseTags = false) where T : Component
+        {
+            GameObject obj = FindInHierarchy(tagType, keys, root, includeInactive, onlyThoseTags);
+            return obj != null ? obj.GetComponent<T>() : default;
+        }
+
+        public static T FindInHierarchy<T>(StringTypeControl tagType, string key, Transform root, bool includeInactive) where T : Component
+        {
+            GameObject obj = FindInHierarchy(tagType, key, root, includeInactive);
+            return obj != null ? obj.GetComponent<T>() : default;
         }
 
         public static GameObject FindInHierarchy(in string rootString, in string gameObjectString)
         {
             GameObject rootObj = GameObject.Find(rootString);
-            if (rootObj)
-            {
-                return TransformExtend.GetChildInHierarchy(rootObj, gameObjectString);
-            }
-            return null;
+            return TransformExtend.GetChildInHierarchy(rootObj, gameObjectString);
+        }
+
+        public static T FindInHierarchy<T>(in string rootString, in string gameObjectString) where T : Component
+        {
+            GameObject obj = FindInHierarchy(rootString, gameObjectString);
+            return obj != null ? obj.GetComponent<T>() : null;
         }
 
         public static T FindInHierarchy<T>(in string rootString) where T : Component
@@ -263,10 +255,10 @@ namespace Pearl
             return null;
         }
 
-        public static T[] FindInterfaces<T>()
+        public static T[] FindAllInterfaces<T>(in bool includeInactive = false)
         {
             List<T> interfaces = new();
-            GameObject[] rootGameObjects = GameObject.FindObjectsOfType<GameObject>();
+            GameObject[] rootGameObjects = GameObject.FindObjectsOfType<GameObject>(includeInactive);
 
             if (rootGameObjects != null)
             {
@@ -281,19 +273,26 @@ namespace Pearl
             }
             return interfaces.ToArray();
         }
-
         #endregion
 
         #region Destroy
+        public static void DestroyOnLoad(GameObject obj)
+        {
+            if (obj != null && obj.transform.parent == null)
+            {
+                SceneManager.MoveGameObjectToScene(obj, SceneManager.GetActiveScene());
+            }
+        }
+
         /// <summary>
         /// Destroy gameobject (if it's a pool manager, it behaves accordingly)
         /// </summary>
-        /// <param name = "obj"> The object that will destroyed</param>
-        public static void DestroyGameObject(this GameObject obj, bool immediate = false)
+        /// <param name = "this"> The object that will destroyed</param>
+        public static void DestroyExtend(this UnityEngine.Object @this, bool immediate = false)
         {
-            if (obj != null)
+            if (@this != null)
             {
-                if (obj.HasTags(false, PoolManager.elementPool))
+                if (@this is GameObject obj && obj.HasTags(false, PoolManager.poolElement))
                 {
                     PoolManager.Remove(obj);
                 }
@@ -301,351 +300,65 @@ namespace Pearl
                 {
                     if (immediate || !Application.isPlaying)
                     {
-                        GameObject.DestroyImmediate(obj);
+                        GameObject.DestroyImmediate(@this);
                     }
                     else
                     {
-                        GameObject.Destroy(obj);
+                        GameObject.Destroy(@this);
                     }
                 }
-            }
-        }
-
-        public static void DestroyComponent<T>(T component) where T : Component
-        {
-            GameObject.Destroy(component);
-        }
-
-        public static void DestroyComponents<T>(ICollection<T> components) where T : Component
-        {
-            foreach (var component in components)
-            {
-                DestroyComponent<T>(component);
-            }
-        }
-
-        public static void DestroyGameObject<T>(T component) where T : Component
-        {
-            DestroyGameObject(component.gameObject);
-        }
-
-        public static void DestroyGameObject<T>(ICollection<T> components) where T : Component
-        {
-            foreach (var component in components)
-            {
-                DestroyGameObject<T>(component);
-            }
-        }
-
-        public static void DestroyGameObject(ICollection<GameObject> gameObjects)
-        {
-            foreach (var gameObject in gameObjects)
-            {
-                DestroyGameObject(gameObject);
             }
         }
         #endregion
 
-        #region Extend Methods
-        public static void CreateGameObjectFromFolder(in string name, out GameObject reference, Transform parent = null)
-        {
-            GameObject prefab = AssetManager.LoadGameObjectFromPath(name);
-            CreateGameObject(prefab, out reference, parent);
-        }
-
-        public static void CreateOnceFromBindings(string tagObject, in string name, out GameObject reference)
-        {
-            GameObject newObject = GameObjectExtend.FindGameObjectWithMultiTags(true, tagObject);
-            if (newObject == null)
-            {
-                CreateGameObjectFromBindings(name, out reference);
-            }
-            else
-            {
-                reference = newObject;
-            }
-        }
-
-        public static void CreateOnceFromBindings<T>(in string name, out GameObject reference) where T : Component
-        {
-            T componentInGame = GameObject.FindObjectOfType<T>();
-            if (componentInGame == null)
-            {
-                CreateGameObjectFromBindings(name, out reference);
-            }
-            else
-            {
-                reference = componentInGame.gameObject;
-            }
-        }
-
-        public static void CreateGameObjectFromBindings<T>(in string path, out T reference, Transform parent = null) where T : Component
-        {
-            GameObject prefab = AssetManager.LoadPrefab(path);
-            CreateGameObject<T>(prefab, out reference, parent);
-        }
-
-        public static bool CreateGameObjectFromBindings<T>(in string path, out T reference, string name, bool dontDestroyAtLoad, Transform parent = null) where T : Component
-        {
-            GameObject prefab = AssetManager.LoadPrefab(path);
-            prefab.name = name;
-            bool result = CreateGameObject<T>(prefab, out reference, parent);
-            if (reference != null && dontDestroyAtLoad)
-            {
-                GameObject.DontDestroyOnLoad(reference);
-            }
-            return result;
-        }
-
-        public static bool CreateGameObjectFromBindings(in string path, out GameObject reference, string name, Transform parent = null)
-        {
-            GameObject prefab = AssetManager.LoadPrefab(path);
-            prefab.name = name;
-            return CreateGameObject(prefab, out reference, parent);
-        }
-
-        public static void CreateGameObjectFromBindings(in string name, out GameObject reference, Transform parent = null, ChangeTypeEnum changeEnum = ChangeTypeEnum.Modify, bool solo = false)
-        {
-            GameObject prefab = AssetManager.LoadPrefab(name);
-            CreateGameObject(prefab, out reference, parent, changeEnum, solo);
-        }
-
-        public static void CreateUIEElementsFromBindings(in string name, out GameObject reference, CanvasTipology tipology = CanvasTipology.Null)
-        {
-            CreateGameObjectFromBindings(name, out reference);
-
-            CanvasManager.Paste(reference.transform, tipology);
-
-            if (reference)
-            {
-                RectTransform rectTransform = reference.GetComponent<RectTransform>();
-                if (rectTransform)
-                {
-                    rectTransform.anchoredPosition = Vector2.zero;
-                }
-            }
-        }
-
-        public static void CreateUIEElementsFromBindings<T>(in string name, out T reference, CanvasTipology tipology = CanvasTipology.Null) where T : Component
-        {
-            reference = null;
-            CreateUIEElementsFromBindings(name, out GameObject newElement, tipology);
-            if (newElement)
-            {
-                reference = newElement.GetComponentInChildren<T>();
-            }
-        }
-
-        public static void CreateUIEElementsFromBindings(in string name, out GameObject reference, Transform parent)
-        {
-            CreateGameObjectFromBindings(name, out reference, parent);
-            if (reference)
-            {
-                RectTransform rectTransform = reference.GetComponent<RectTransform>();
-                if (rectTransform)
-                {
-                    rectTransform.anchoredPosition = Vector2.zero;
-                }
-            }
-        }
-
-        public static void CreateUIEElementsFromBindings<T>(in string name, out T reference, Transform parent) where T : Component
-        {
-            CreateUIEElementsFromBindings(name, out GameObject newElement, parent);
-            reference = null;
-            if (newElement)
-            {
-                reference = newElement.GetComponentInChildren<T>();
-            }
-        }
-
         #region Create GameObjct
 
         #region Create Without prefab
-        public static T CreateGameObject<T>(in string name, bool dontDestoryAtLoad = false, params Type[] components) where T : Component
-        {
-            return CreateGameObject<T>(name, dontDestoryAtLoad, null, components);
-        }
-
-        public static T CreateGameObject<T>(in string name, bool dontDestoryAtLoad, Transform parent, params Type[] components) where T : Component
-        {
-            GameObject obj = new(name, components);
-            obj.transform.SetParent(parent);
-
-            if (dontDestoryAtLoad)
-            {
-                GameObject.DontDestroyOnLoad(obj);
-            }
-
-            return obj != null ? obj.AddOnlyOneComponent<T>() : default;
-        }
-
-        public static GameObject CreateGameObject(string name, Transform parent, bool dontDestoryAtLoad = false, params Type[] components)
-        {
-            ParentStruct parentStruct = new(parent);
-            return CreateGameObject(name, parentStruct, dontDestoryAtLoad, components);
-        }
-
-        public static GameObject CreateGameObject<T>(string name, Transform parent, bool dontDestoryAtLoad = false)
-        {
-            ParentStruct parentStruct = new(parent);
-            return CreateGameObject(name, parentStruct, dontDestoryAtLoad, typeof(T));
-        }
-
-        public static GameObject CreateGameObject<T>(string name, ParentStruct parentStruct, bool dontDestoryAtLoad = false)
-        {
-            return CreateGameObject(name, parentStruct, dontDestoryAtLoad, typeof(T));
-        }
-
-        public static GameObject CreateGameObject<T, F>(string name, Transform parent, bool dontDestoryAtLoad = false)
-        {
-            ParentStruct parentStruct = new(parent);
-            return CreateGameObject(name, parentStruct, dontDestoryAtLoad, typeof(T), typeof(F));
-        }
-
-        public static GameObject CreateGameObject<T, F>(string name, ParentStruct parentStruct, bool dontDestoryAtLoad = false)
-        {
-            return CreateGameObject(name, parentStruct, dontDestoryAtLoad, typeof(T), typeof(F));
-        }
-
-        public static GameObject CreateGameObject(string name, ParentStruct parent, bool dontDestoryAtLoad = false, params Type[] components)
+        public static GameObject CreateGameObject(string name, Transform parent = null, WorldReference parentReference = WorldReference.World, bool dontDestroyAtLoad = false, params Type[] components)
         {
             var list = components.FilterArray((x) => x != typeof(Transform));
 
             GameObject obj = new(name, list);
             if (obj)
             {
-                if (dontDestoryAtLoad)
+                if (dontDestroyAtLoad)
                 {
                     GameObject.DontDestroyOnLoad(obj);
                 }
-                obj.transform.SetParent(parent);
+
+                ParentStruct parentStruct = new(parent, parentReference);
+                obj.transform.SetParent(parentStruct);
                 return obj;
             }
             return null;
         }
 
-
-        public static T CreateGameObjectWithComponent<T>(string name, Transform parent, bool dontDestoryAtLoad = false, params Type[] components) where T : Component
+        public static T CreateGameObject<T>(string name, Transform parent = null, WorldReference parentReference = WorldReference.World, bool dontDestroyAtLoad = false, params Type[] components) where T : Component
         {
-            GameObject obj = CreateGameObject(name, parent, dontDestoryAtLoad, components);
-            return obj != null ? obj.GetComponent<T>() : null;
-        }
+            GameObject obj = CreateGameObject(name, parent, parentReference, dontDestroyAtLoad, components);
 
-        public static T CreateGameObjectWithComponent<T>(string name, ParentStruct parent, bool dontDestoryAtLoad = false) where T : Component
-        {
-            GameObject obj = CreateGameObject(name, parent, dontDestoryAtLoad, typeof(T));
-            return obj != null ? obj.GetComponent<T>() : null;
+            return obj != null ? obj.AddOnlyOneComponent<T>() : default;
         }
-
-        public static T CreateGameObjectWithComponent<T>(string name, Transform parent = null, bool dontDestoryAtLoad = false) where T : Component
-        {
-            GameObject obj = CreateGameObject(name, parent, dontDestoryAtLoad, typeof(T));
-            return obj != null ? obj.GetComponent<T>() : null;
-        }
-
         #endregion
 
-
-        public static GameObject CreateGameObject(GameObject prefab)
+        #region Create GameObject With prefab
+        public static bool CreateGameObject<T>(GameObject prefab, out T reference, string name = null, Vector3 position = default, Quaternion rotation = default, Transform parent = null, WorldReference parentReference = WorldReference.World, bool onlyInTheScene = false, bool dontDestroyAtLoad = false) where T : Component
         {
-            CreateGameObject(prefab, out GameObject result);
-            return result;
-        }
-
-        public static GameObject CreateGameObject(GameObject prefab, Transform parent)
-        {
-            CreateGameObject(prefab, out GameObject result, parent);
-            return result;
-        }
-
-        public static bool CreateGameObject<T>(GameObject prefab, out T reference, Transform parent, bool solo = false) where T : Component
-        {
-            return CreateGameObject<T>(prefab, out reference, null, Vector3.zero, Quaternion.identity, parent, ChangeTypeEnum.Modify, solo);
-        }
-
-        public static bool CreateGameObject<T>(GameObject prefab, out T reference, bool solo = false) where T : Component
-        {
-            return CreateGameObject<T>(prefab, out reference, null, Vector3.zero, Quaternion.identity, null, ChangeTypeEnum.Modify, solo);
-        }
-
-        public static bool CreateGameObject<T>(GameObject prefab, out T reference, Vector3 position, bool solo = false) where T : Component
-        {
-            return CreateGameObject<T>(prefab, out reference, null, position, Quaternion.identity, null, ChangeTypeEnum.Modify, solo);
-        }
-
-        public static bool CreateGameObject<T>(GameObject prefab, out T reference, string name, bool solo = false) where T : Component
-        {
-            return CreateGameObject<T>(prefab, out reference, name, Vector3.zero, Quaternion.identity, null, ChangeTypeEnum.Modify, solo);
-        }
-
-        public static bool CreateGameObject<T>(GameObject prefab, out T reference, Vector3 position, Transform parent, bool solo = false) where T : Component
-        {
-            return CreateGameObject<T>(prefab, out reference, null, position, Quaternion.identity, parent, ChangeTypeEnum.Setting, solo);
-        }
-
-        public static bool CreateGameObject(GameObject prefab, out GameObject reference, bool solo = false)
-        {
-            return CreateGameObject(prefab, out reference, null, Vector3.zero, Quaternion.identity, null, ChangeTypeEnum.Modify, solo);
-        }
-
-        public static bool CreateGameObject(GameObject prefab, out GameObject reference, Transform parent, bool solo = false)
-        {
-            CreateGameObject(prefab, out reference, null, Vector3.zero, Quaternion.identity, parent, ChangeTypeEnum.Modify, solo);
-            return reference != null;
-        }
-
-        public static bool CreateGameObject(GameObject prefab, out GameObject reference, Vector3 position, bool solo = false)
-        {
-            return CreateGameObject(prefab, out reference, null, position, Quaternion.identity, null, ChangeTypeEnum.Modify, solo);
-        }
-
-        public static bool CreateGameObject(GameObject prefab, out GameObject reference, Vector3 position, Transform parent, bool solo = false)
-        {
-            return CreateGameObject(prefab, out reference, null, position, Quaternion.identity, parent, ChangeTypeEnum.Setting, solo);
-        }
-
-        public static bool CreateGameObject(GameObject prefab, out GameObject reference, string name, bool solo = false)
-        {
-            return CreateGameObject(prefab, out reference, name, Vector3.zero, Quaternion.identity, null, ChangeTypeEnum.Modify, solo);
-        }
-
-        public static bool CreateGameObject<T>(GameObject prefab, out T reference, Transform parent, ChangeTypeEnum changeEnum, bool solo = false) where T : Component
-        {
-            return CreateGameObject<T>(prefab, out reference, null, Vector3.zero, Quaternion.identity, parent, changeEnum, solo);
-        }
-
-        public static bool CreateGameObject<T>(GameObject prefab, out T reference, Vector3 position, Transform parent, ChangeTypeEnum changeEnum, bool solo = false) where T : Component
-        {
-            return CreateGameObject<T>(prefab, out reference, null, position, Quaternion.identity, parent, changeEnum, solo);
-        }
-
-        public static bool CreateGameObject(GameObject prefab, out GameObject reference, Transform parent, ChangeTypeEnum changeEnum, bool solo = false)
-        {
-            return CreateGameObject(prefab, out reference, null, Vector3.zero, Quaternion.identity, parent, changeEnum, solo);
-        }
-
-        public static bool CreateGameObject(GameObject prefab, out GameObject reference, Vector3 position, Transform parent, ChangeTypeEnum changeEnum, bool solo = false)
-        {
-            return CreateGameObject(prefab, out reference, null, position, Quaternion.identity, parent, changeEnum, solo);
-        }
-
-        public static bool CreateGameObject<T>(GameObject prefab, out T reference, string name, Vector3 position, Quaternion rotation, Transform parent = null, ChangeTypeEnum changeEnum = ChangeTypeEnum.Modify, bool solo = false) where T : Component
-        {
+            CreateGameObject(prefab, out GameObject obj, name, position, rotation, parent, parentReference, onlyInTheScene);
             reference = null;
-            if (CreateGameObject(prefab, out GameObject newElement, name, position, rotation, parent, changeEnum, solo))
+            if (obj != null)
             {
-                reference = newElement.GetComponentInChildren<T>();
+                reference = obj.AddOnlyOneComponent<T>();
+                return reference != null;
             }
-
-            return reference != null;
+            return false;
         }
 
-        public static bool CreateGameObject(GameObject prefab, out GameObject reference, string name, Vector3 position, Quaternion rotation, Transform parent = null, ChangeTypeEnum changeEnum = ChangeTypeEnum.Modify, bool solo = false)
+        public static bool CreateGameObject(GameObject prefab, out GameObject reference, string name = null, Vector3 position = default, Quaternion rotation = default, Transform parent = null, WorldReference parentReference = WorldReference.World, bool onlyInTheScene = false, bool dontDestroyAtLoad = false)
         {
             if (prefab)
             {
-                if (solo)
+                if (onlyInTheScene)
                 {
                     GameObject aux = GameObject.Find(prefab.name);
                     if (aux != null)
@@ -655,13 +368,17 @@ namespace Pearl
                     }
                 }
 
-                if (parent != null && changeEnum == ChangeTypeEnum.Modify)
+                reference = (GameObject)GameObject.Instantiate(prefab, position, rotation);
+                if (reference)
                 {
-                    position += parent.position;
+                    reference.name = name ?? reference.name.Split('(')[0];
+                    ParentStruct parentStruct = new(parent, parentReference);
+                    reference.transform.SetParent(parentStruct);
+                    if (dontDestroyAtLoad)
+                    {
+                        GameObject.DontDestroyOnLoad(reference);
+                    }
                 }
-
-                reference = (GameObject)GameObject.Instantiate(prefab, position, rotation, parent);
-                reference.name = name ?? reference.name.Split('(')[0];
             }
             else
             {
@@ -670,88 +387,86 @@ namespace Pearl
 
             return reference != null;
         }
+        #endregion
+
+        #region Create With Resources
+        public static bool CreateGameObjectFromBindings<T>(in string path, out T reference, string name = null, Vector3 position = default, Quaternion rotation = default, Transform parent = null, WorldReference parentReference = WorldReference.World, bool onlyInTheScene = false, bool dontDestroyAtLoad = false) where T : Component
+        {
+            CreateGameObjectFromBindings(path, out GameObject obj, name, position, rotation, parent, parentReference, onlyInTheScene);
+            reference = null;
+            if (obj != null)
+            {
+                reference = obj.AddOnlyOneComponent<T>();
+                return reference != null;
+            }
+            return false;
+        }
+
+        public static bool CreateGameObjectFromBindings(in string path, out GameObject reference, string name = null, Vector3 position = default, Quaternion rotation = default, Transform parent = null, WorldReference parentReference = WorldReference.World, bool onlyInTheScene = false, bool dontDestroyAtLoad = false)
+        {
+            GameObject prefab = AssetManager.LoadPrefab(path);
+            return CreateGameObject(prefab, out reference, name, position, rotation, parent, parentReference, onlyInTheScene);
+        }
+
+        public static bool CreateUIEElementsFromBindings(in string path, out GameObject reference, string name = null, CanvasTipology canvasTipology = CanvasTipology.Null, Vector3 position = default, Quaternion rotation = default, Transform parent = null, WorldReference parentReference = WorldReference.World, bool onlyInTheScene = false, bool dontDestroyAtLoad = false)
+        {
+            CreateGameObjectFromBindings(path, out reference, name, position, rotation, parent, parentReference, onlyInTheScene);
+            if (reference != null)
+            {
+                CanvasPaste(reference.transform, canvasTipology);
+                return true;
+            }
+            return false;
+        }
+
+        public static bool CreateUIEElementsFromBindings<T>(in string path, out T reference, string name = null, CanvasTipology canvasTipology = CanvasTipology.Null, Vector3 position = default, Quaternion rotation = default, Transform parent = null, WorldReference parentReference = WorldReference.World, bool onlyInTheScene = false, bool dontDestroyAtLoad = false) where T : Component
+        {
+            CreateGameObjectFromBindings<T>(path, out reference, name, position, rotation, parent, parentReference, onlyInTheScene);
+            if (reference != null)
+            {
+                CanvasPaste(reference.transform, canvasTipology);
+                return true;
+            }
+            return false;
+        }
+        #endregion
+
+        #region Create UI Element
+        public static bool CreateUIlement(in GameObject prefab, out GameObject reference, string name = null, CanvasTipology canvasTipology = CanvasTipology.Null, Vector3 position = default, Quaternion rotation = default, Transform parent = null, WorldReference parentReference = WorldReference.World, bool onlyInTheScene = false, bool dontDestroyAtLoad = false)
+        {
+            CreateGameObject(prefab, out reference, name, position, rotation, parent, parentReference, onlyInTheScene);
+            if (reference != null)
+            {
+                CanvasPaste(reference.transform, canvasTipology);
+                return true;
+            }
+            return false;
+        }
+
+        public static bool CreateUIlement<T>(in GameObject prefab, out T reference, string name = null, CanvasTipology canvasTipology = CanvasTipology.Null, Vector3 position = default, Quaternion rotation = default, Transform parent = null, WorldReference parentReference = WorldReference.World, bool onlyInTheScene = false, bool dontDestroyAtLoad = false) where T : Component
+        {
+            CreateGameObject<T>(prefab, out reference, name, position, rotation, parent, parentReference, onlyInTheScene);
+            if (reference != null)
+            {
+                CanvasPaste(reference.transform, canvasTipology);
+                return true;
+            }
+            return false;
+        }
+        #endregion
 
         #endregion
 
-        public static void CreateUIlement(GameObject prefab, out GameObject reference, CanvasTipology tipology = CanvasTipology.Null, ChangeTypeEnum changeEnum = ChangeTypeEnum.Modify, bool solo = false)
+        #region Copy
+        public static GameObject Copy(this GameObject @this, params Type[] excludes)
         {
-            CreateGameObject(prefab, out reference, null, changeEnum, solo);
-            if (reference)
-            {
-                CanvasManager.Paste(reference.transform, tipology);
-
-                RectTransform rectTransform = reference.GetComponent<RectTransform>();
-                if (rectTransform)
-                {
-                    rectTransform.anchoredPosition = Vector2.zero;
-                }
-            }
-        }
-
-        public static void CreateUIlement<T>(GameObject prefab, out T reference, CanvasTipology tipology = CanvasTipology.Null, ChangeTypeEnum changeEnum = ChangeTypeEnum.Modify, bool solo = false) where T : Component
-        {
-            reference = null;
-            CreateUIlement(prefab, out GameObject newElement, tipology, changeEnum, solo);
-            if (newElement)
-            {
-                reference = newElement.GetComponentInChildren<T>();
-            }
-        }
-
-        public static void CreateUIlement(GameObject prefab, out GameObject reference, Transform parent = null, ChangeTypeEnum changeEnum = ChangeTypeEnum.Modify, bool solo = false)
-        {
-            CreateGameObject(prefab, out reference, parent, changeEnum, solo);
-
-            if (reference)
-            {
-                RectTransform rectTransform = reference.GetComponent<RectTransform>();
-                if (rectTransform)
-                {
-                    rectTransform.anchoredPosition = Vector2.zero;
-                }
-            }
-        }
-
-        public static void CreateUIlement<T>(GameObject prefab, out T reference, Transform parent = null, ChangeTypeEnum changeEnum = ChangeTypeEnum.Modify, bool solo = false) where T : Component
-        {
-            reference = null;
-            CreateUIlement(prefab, out GameObject newElement, parent, changeEnum, solo);
-            if (newElement)
-            {
-                reference = newElement.GetComponentInChildren<T>();
-            }
-        }
-
-        public static GameObject FindGameObjectWithMultiTags(bool only, params string[] tagsParameter)
-        {
-            return MultiTagsManager.FindGameObjectWithMultiTags(only, tagsParameter);
-        }
-
-        public static GameObject[] FindGameObjectsWithMultiTags(bool only, params string[] tagsParameter)
-        {
-            return MultiTagsManager.FindGameObjectsWithMultiTags(only, tagsParameter);
+            GameObject copied = new(@this.name);
+            Copy(copied, @this, excludes);
+            return copied;
         }
 
 
-        /// <summary>
-        /// returns all the specific components in the scene except the the caller
-        /// </summary>
-        /// <param name = "obj">The object that have the components</param>
-        public static T[] FindOtherObjectsOfType<T>(this GameObject obj) where T : MonoBehaviour
-        {
-            if (obj != null)
-            {
-                List<T> list = new(GameObject.FindObjectsOfType<T>());
-                if (list != null)
-                {
-                    list.Remove(list.Find(x => x.gameObject.GetInstanceID() == obj.GetInstanceID()));
-                    return list.ToArray();
-                }
-            }
-            return null;
-        }
-
-        public static void CopyAllComponents(this GameObject obj, GameObject toCopy, params Type[] excludes)
+        public static void Copy(this GameObject @this, GameObject toCopy, params Type[] excludes)
         {
             foreach (var component in toCopy.GetAllComponents())
             {
@@ -762,16 +477,26 @@ namespace Pearl
 
                 Type currentType = component.GetType();
                 Component newComponent;
-                if (currentType == typeof(Transform))
-                {
-                    newComponent = obj.GetComponent<Transform>();
-                }
-                else
-                {
-                    newComponent = obj.AddComponent(currentType);
-                }
 
+
+                newComponent = currentType == typeof(Transform) ? @this.GetComponent<Transform>() : @this.AddComponent(currentType);
                 newComponent.GetCopyOf(component);
+            }
+        }
+        #endregion
+
+        #region Private Methods
+        private static void CanvasPaste(Transform transform, CanvasTipology canvasTipology = CanvasTipology.Null)
+        {
+            CanvasManager.Paste(transform, canvasTipology);
+
+            if (transform != null)
+            {
+                RectTransform rectTransform = transform.GetComponent<RectTransform>();
+                if (rectTransform)
+                {
+                    rectTransform.anchoredPosition = Vector2.zero;
+                }
             }
         }
         #endregion

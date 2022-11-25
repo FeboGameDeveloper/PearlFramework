@@ -64,7 +64,7 @@ namespace Pearl
         #region Private
         private void GenerateQuestionarieUIInternal(QuestionInfo questionInfo, in string focusGroup)
         {
-            GameObjectExtend.CreateUIlement<QuestionChoiseUIManager>(questionariePrefab, out QuestionChoiseUIManager questionManager, Pearl.UI.CanvasTipology.Debug);
+            GameObjectExtend.CreateUIlement<QuestionChoiseUIManager>(questionariePrefab, out QuestionChoiseUIManager questionManager, canvasTipology: CanvasTipology.Debug);
 
             if (questionManager)
             {
