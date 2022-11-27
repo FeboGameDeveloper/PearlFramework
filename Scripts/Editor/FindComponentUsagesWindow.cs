@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace Pearl
+namespace Pearl.Editor
 {
     public class FindComponentUsagesWindow : EditorWindow
     {
@@ -461,5 +461,4 @@ namespace Pearl
             return result.ToArray();
         }
     }
-
 }

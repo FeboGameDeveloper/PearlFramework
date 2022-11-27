@@ -33,7 +33,6 @@ namespace Pearl
         }
         #endregion
 
-
         #region Equals
         public static bool IsEqual(this GameObject @this, GameObject aux, StringTypeControl tagType)
         {

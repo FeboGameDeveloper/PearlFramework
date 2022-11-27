@@ -32,14 +32,14 @@ namespace Pearl.UI
                 return;
             }
 
-            Vector2 newAnchorsMin = new Vector2(@this.anchorMin.x + @this.offsetMin.x / pt.rect.width,
+            Vector2 newAnchorsMin = new (@this.anchorMin.x + @this.offsetMin.x / pt.rect.width,
                                                 @this.anchorMin.y + @this.offsetMin.y / pt.rect.height);
-            Vector2 newAnchorsMax = new Vector2(@this.anchorMax.x + @this.offsetMax.x / pt.rect.width,
+            Vector2 newAnchorsMax = new (@this.anchorMax.x + @this.offsetMax.x / pt.rect.width,
                                                 @this.anchorMax.y + @this.offsetMax.y / pt.rect.height);
 
             @this.anchorMin = newAnchorsMin;
             @this.anchorMax = newAnchorsMax;
-            @this.offsetMin = @this.offsetMax = new Vector2(0, 0);
+            @this.offsetMin = @this.offsetMax = Vector2.zero;
         }
 
 
