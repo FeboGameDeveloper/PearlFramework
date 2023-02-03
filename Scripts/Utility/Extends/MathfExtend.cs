@@ -86,6 +86,26 @@ namespace Pearl
             }
             return result;
         }
+
+        /// <summary>
+        /// Computes and returns the angle between two vectors, on a 360° scale
+        /// </summary>
+        /// <returns>The <see cref="System.Single"/>.</returns>
+        /// <param name="vectorA">Vector a.</param>
+        /// <param name="vectorB">Vector b.</param>
+        public static float AngleBetween(Vector2 vectorA, Vector2 vectorB)
+        {
+            float angle = Vector2.Angle(vectorA, vectorB);
+            Vector3 cross = Vector3.Cross(vectorA, vectorB);
+
+            if (cross.z > 0)
+            {
+                angle = 360 - angle;
+            }
+
+            return angle;
+        }
+
         public static float Lerp(float a, float b, float t, FunctionEnum function)
         {
             var func = FunctionDefinition.GetFunction(function);

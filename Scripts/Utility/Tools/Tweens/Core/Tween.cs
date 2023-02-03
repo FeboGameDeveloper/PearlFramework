@@ -572,6 +572,7 @@ namespace Pearl.Tweens
         {
             OnComplete = null;
             PearlInvoke.StopTimer<float, float>(OnFinishWait);
+			PathReference = TypeReferenceEnum.Absolute;
             _isLoop = false;
             _pingPong = false;
             _waitAtEndPath = 0f;

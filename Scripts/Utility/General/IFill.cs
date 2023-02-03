@@ -4,5 +4,4 @@ namespace Pearl
     {
         void Fill(float percent);
     }
-
 }
