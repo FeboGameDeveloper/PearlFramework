@@ -1,4 +1,4 @@
-#if NODE_CANVAS
+#if NODE_CANVAS && LOCALIZATION
 
 using NodeCanvas.Framework;
 using ParadoxNotion.Design;

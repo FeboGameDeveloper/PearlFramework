@@ -50,6 +50,16 @@ namespace Pearl.Input
             return default;
         }
 
+        public static bool PointerIsPressed()
+        {
+            if (SystemInfo.deviceType == DeviceType.Handheld)
+            {
+                return Touchscreen.current.primaryTouch.isInProgress;
+            }
+
+            return Mouse.current.leftButton.isPressed;
+        }
+
         public static Vector3 PointerWorldPosition(this Camera @this)
         {
             var position = GetScreenPosition();

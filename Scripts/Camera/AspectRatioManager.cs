@@ -12,6 +12,9 @@ namespace Pearl
         private Camera cam = null;
 
         [SerializeField]
+        private bool ignoreInvertedProportion = true;
+
+        [SerializeField]
         private bool useText = false;
 
         [SerializeField, ConditionalField("!@useText")]
@@ -95,6 +98,12 @@ namespace Pearl
 
             if (cam != null)
             {
+                if (ignoreInvertedProportion && !(  (aspectRatio < 1 && cam.aspect < 1) || (aspectRatio > 1 && cam.aspect > 1) )) 
+                {
+                    return;
+                }
+
+
                 var variance = aspectRatio / cam.aspect;
                 if (variance < 1.0)
                 {
