@@ -50,7 +50,7 @@ namespace Pearl.Input
             return default;
         }
 
-        public static bool PointerIsPressed()
+        public static bool IsPointerPressed()
         {
             if (SystemInfo.deviceType == DeviceType.Handheld)
             {
