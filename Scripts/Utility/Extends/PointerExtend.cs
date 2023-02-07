@@ -50,16 +50,6 @@ namespace Pearl.Input
             return default;
         }
 
-        public static bool IsPointerPressed()
-        {
-            if (SystemInfo.deviceType == DeviceType.Handheld)
-            {
-                return Touchscreen.current.primaryTouch.isInProgress;
-            }
-
-            return Mouse.current.leftButton.isPressed;
-        }
-
         public static Vector3 PointerWorldPosition(this Camera @this)
         {
             var position = GetScreenPosition();
@@ -69,6 +59,16 @@ namespace Pearl.Input
         public static Vector3 PointerWorldPosition()
         {
             return PointerWorldPosition(Camera.main);
+        }
+
+        public static bool IsPointerPressed(bool left = true)
+        {
+            if (SystemInfo.deviceType == DeviceType.Handheld)
+            {
+                return Touchscreen.current.primaryTouch.isInProgress;
+            }
+
+            return left ? Mouse.current.leftButton.isPressed : Mouse.current.rightButton.isPressed;
         }
 
         public static bool IsPointerOver(Bounds bounds, bool is2D = false)
