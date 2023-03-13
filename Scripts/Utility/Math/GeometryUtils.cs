@@ -83,5 +83,18 @@ namespace Pearl
 
             return angle;
         }
+
+        public static bool IsInsideRectangle(float x, float y, float width, float height, float pointX, float pointY)
+        {
+            return pointX >= x - width * .5f &&
+                pointX <= x + width * .5f &&
+                pointY >= y - height * .5f &&
+                pointY <= y + height * .5f;
+        }
+
+        public static bool IsInsideCircle(float x, float y, float radius, float pointX, float pointY)
+        {
+            return (pointX - x) * (pointX - x) + (pointY - y) * (pointY - y) < radius * radius;
+        }
     }
 }

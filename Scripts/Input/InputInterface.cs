@@ -1,6 +1,8 @@
 ﻿using Pearl.Events;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
@@ -120,6 +122,11 @@ namespace Pearl.Input
             private readonly InputActionAsset _actions;
             private readonly Dictionary<DelegateInfo, ActionForDelegateInfo> _actionDelegates = new();
             private readonly Dictionary<string, List<string>> _mapsBlock = new();
+
+            private readonly Dictionary<InputAction, int> _inputActions = new();
+            private readonly Dictionary<string, bool> _axisPastValue = new();
+            private readonly List<InputAction> _inputActionsInterrupt = new();
+            private readonly List<InputAction> _inputActionsBlock = new();
             #endregion
 
             #region Properties
@@ -145,9 +152,47 @@ namespace Pearl.Input
                 {
                     containerAction.trigger = false;
                 }
+
+                _inputActionsInterrupt.Clear();
             }
 
-            public Vector2 GetVectorAxis(in string actionString, in bool raw = false, Func<Vector2, Vector2> filter = null)
+            public void ClearAixsValue()
+            {
+                _axisPastValue?.Clear();
+            }
+
+            public void InterruptInput(in string actionString)
+            {
+                if (actionString != null)
+                {
+                    InputAction action = _actions.FindAction(actionString);
+                    if (action != null)
+                    {
+                        _inputActionsInterrupt.Add(action);
+                    }
+                }
+            }
+
+            public void BlockInput(in string actionString, in bool block)
+            {
+                if (actionString != null)
+                {
+                    InputAction action = _actions.FindAction(actionString);
+                    if (action != null)
+                    {
+                        if (block)
+                        {
+                            _inputActionsBlock.AddOnce(action);
+                        }
+                        else
+                        {
+                            _inputActionsBlock.Remove(action);
+                        }
+                    }
+                }
+            }
+
+            public Vector2 GetVectorAxis(in string actionString, in bool raw = false, bool ignoreBlock = false, Func<Vector2, Vector2> filter = null)
             {
                 if (actionString != null)
                 {
@@ -155,6 +200,12 @@ namespace Pearl.Input
 
                     if (action != null)
                     {
+                        if (!ignoreBlock && (_inputActionsInterrupt.Contains(action) || _inputActionsBlock.Contains(action)) )
+                        {
+                            return Vector2.zero;
+                        }
+
+
                         if (action.actionMap != null && _mapsBlock.IsAlmostSpecificCount())
                         {
                             string map = action.actionMap.name;
@@ -187,7 +238,32 @@ namespace Pearl.Input
                 return Vector2.zero;
             }
 
-            public float GetAxis(in string actionString, in bool raw = false, Func<float, float> filter = null)
+            public Vector2 GetVectorAxis(in string actionString, StateButton stateButton, in bool raw = false, bool ignoreBlock = false, Func<Vector2, Vector2> filter = null)
+            {
+                if (!_axisPastValue.TryGetValue(actionString, out bool pastValue))
+                {
+                    _axisPastValue.Add(actionString, pastValue);
+                }
+
+                Vector2 newValue = GetVectorAxis(actionString, raw, ignoreBlock, filter);
+                bool result = newValue != Vector2.zero;
+                _axisPastValue[actionString] = result;
+
+                if (stateButton == StateButton.Down)
+                {
+                    return result && !pastValue ? newValue : Vector2.zero;
+                }
+                else if (stateButton == StateButton.Up)
+                {
+                    return !result && pastValue ? newValue : Vector2.zero;
+                }
+                else
+                {
+                    return newValue;
+                }
+            }
+
+            public float GetAxis(in string actionString, in bool raw = false, bool ignoreBlock = false, Func<float, float> filter = null)
             {
                 if (actionString != null)
                 {
@@ -195,6 +271,12 @@ namespace Pearl.Input
 
                     if (action != null)
                     {
+                        if (!ignoreBlock && (_inputActionsInterrupt.Contains(action) || _inputActionsBlock.Contains(action)))
+                        {
+                            return 0;
+                        }
+
+
                         if (action.actionMap != null && _mapsBlock.IsAlmostSpecificCount())
                         {
                             string map = action.actionMap.name;
@@ -227,6 +309,31 @@ namespace Pearl.Input
                 return 0;
             }
 
+            public float GetAxis(in string actionString, StateButton stateButton, in bool raw = false, bool ignoreBlock = false, Func<float, float> filter = null)
+            {
+                if (!_axisPastValue.TryGetValue(actionString, out bool pastValue))
+                {
+                    _axisPastValue.Add(actionString, pastValue);
+                }
+
+                float newValue = GetAxis(actionString, raw, ignoreBlock, filter);
+                bool result = newValue != 0;
+                _axisPastValue[actionString] = result;
+
+                if (stateButton == StateButton.Down)
+                {
+                    return result && !pastValue ? newValue : 0;
+                }
+                else if (stateButton == StateButton.Up)
+                {
+                    return !result && pastValue ? newValue : 0;
+                }
+                else
+                {
+                    return newValue;
+                }
+            }
+
             public void PerformedHandle(in string actionString, in Action actionDown, in Action actionUp, in ActionEvent actionEvent, in string mapString = null)
             {
                 PerformedHandle(actionString, actionDown, actionEvent, StateButton.Down, mapString);
@@ -253,45 +360,55 @@ namespace Pearl.Input
 
                     if (inputAction != null)
                     {
+                        if (_inputActionsInterrupt.Contains(inputAction) || _inputActionsBlock.Contains(inputAction))
+                        {
+                            return;
+                        }
+
+
                         DelegateInfo delegateInfo = new(actionString, stateButton);
                         bool isFound = _actionDelegates.TryGetValue(delegateInfo, out var actionContainer);
 
                         if (actionEvent == ActionEvent.Add)
                         {
+                            if (_inputActions.ContainsKey(inputAction))
+                            {
+                                _inputActions[inputAction]++;
+                            }
+                            else
+                            {
+                                _inputActions.Add(inputAction, 1);
+                                inputAction.performed += InvokeAction;
+                                inputAction.canceled += InvokeAction;
+                            }
+
+
                             if (!isFound)
                             {
                                 actionContainer = new ActionForDelegateInfo();
                                 _actionDelegates.Add(delegateInfo, actionContainer);
-
-                                if (stateButton == StateButton.Up)
-                                {
-                                    inputAction.canceled += InvokeAction;
-                                    inputAction.performed += InvokeAction;
-                                }
-                                else
-                                {
-                                    inputAction.performed += InvokeAction;
-                                }
                             }
                             actionContainer.AddAction(action);
                         }
                         else if (isFound)
                         {
+                            if (_inputActions.ContainsKey(inputAction))
+                            {
+                                _inputActions[inputAction]--;
+                                if (_inputActions[inputAction] == 0)
+                                {
+                                    _inputActions.Remove(inputAction);
+                                    inputAction.performed -= InvokeAction;
+                                    inputAction.canceled -= InvokeAction;
+                                }
+                            }
+
+
                             actionContainer.RemoveAction(action);
 
                             if (actionContainer.IsNull())
                             {
                                 _actionDelegates.Remove(delegateInfo);
-
-                                if (stateButton == StateButton.Up)
-                                {
-                                    inputAction.canceled -= InvokeAction;
-                                    inputAction.performed -= InvokeAction;
-                                }
-                                else
-                                {
-                                    inputAction.performed -= InvokeAction;
-                                }
                             }
                         }
                     }
@@ -335,7 +452,7 @@ namespace Pearl.Input
                         }
                     }
 
-                    StateButton stateButton = context.canceled ? StateButton.Up : (context.control.IsPressed() ? StateButton.Down : StateButton.Up);
+                    StateButton stateButton = context.control.IsPressed() && !context.canceled ? StateButton.Down : StateButton.Up;
                     DelegateInfo delegateInfo = new(inputActonString, stateButton);
 
                     if (_actionDelegates.TryGetValue(delegateInfo, out var actionContainer) && !actionContainer.trigger)
@@ -389,7 +506,9 @@ namespace Pearl.Input
         protected override void Awake()
         {
             base.Awake();
+
             _inputState = new InputState(playerInput);
+            PearlEventsManager.AddAction<string>(ConstantStrings.newSceneEvent, OnChangeScene);
         }
 
         protected void Reset()
@@ -429,39 +548,68 @@ namespace Pearl.Input
             {
                 playerInput.onControlsChanged -= OnChangeController;
             }
+
+            PearlEventsManager.RemoveAction<string>(ConstantStrings.newSceneEvent, OnChangeScene);
         }
         #endregion
 
         #region Public methods
 
+        public void InterruptInput(in string actionString)
+        {
+            _inputState?.InterruptInput(actionString);
+        }
+
+        public void BlockInput(in string actionString, in bool block)
+        {
+            _inputState?.BlockInput(actionString, block);
+        }
+
         #region Axis
-        public Vector2 GetVectorAxis(in string actionString, in bool raw = false, Func<Vector2, Vector2> filter = null)
+        public void ClearAixsValue()
         {
             if (_inputState != null)
             {
-                return _inputState.GetVectorAxis(actionString, raw, filter);
+                _inputState.ClearAixsValue();
+            }
+        }
+
+        public Vector2 GetVectorAxis(in string actionString, StateButton stateButton, in bool raw = false, bool ignoreBlock = false, Func<Vector2, Vector2> filter = null)
+        {
+            if (_inputState != null)
+            {
+                return _inputState.GetVectorAxis(actionString, stateButton, raw, ignoreBlock, filter);
             }
             return Vector2.zero;
         }
 
-        public Vector2 GetVectorAxis(in string actionString, Func<Vector2, Vector2> filter)
-        {
-            return GetVectorAxis(actionString, false, filter);
-        }
-
-        public float GetAxis(in string actionString, in bool raw = false, Func<float, float> filter = null)
+        public Vector2 GetVectorAxis(in string actionString, in bool raw = false, bool ignoreBlock = false, Func<Vector2, Vector2> filter = null)
         {
             if (_inputState != null)
             {
-                return _inputState.GetAxis(actionString, raw, filter);
+                return _inputState.GetVectorAxis(actionString, raw, ignoreBlock, filter);
+            }
+            return Vector2.zero;
+        }
+
+        public float GetAxis(in string actionString, StateButton stateButton, in bool raw = false, bool ignoreBlock = false, Func<float, float> filter = null)
+        {
+            if (_inputState != null)
+            {
+                return _inputState.GetAxis(actionString, stateButton, raw, ignoreBlock, filter);
             }
 
             return 0;
         }
 
-        public float GetAxis(in string actionString, Func<float, float> filter)
+        public float GetAxis(in string actionString, in bool raw = false, bool ignoreBlock = false, Func<float, float> filter = null)
         {
-            return GetAxis(actionString, false, filter);
+            if (_inputState != null)
+            {
+                return _inputState.GetAxis(actionString, raw, ignoreBlock, filter);
+            }
+
+            return 0;
         }
         #endregion
 
@@ -521,6 +669,11 @@ namespace Pearl.Input
         #endregion
 
         #region Private methods
+        private void OnChangeScene(string _)
+        {
+            ClearAixsValue();
+        }
+
         //Via reflection
         private void SetNumberPlayer(int numberPlayerParam)
         {

@@ -205,6 +205,7 @@ namespace Pearl.Ink
         #region Private Methods
         private string GetText(in string jsonString)
         {
+#if LOCALIZATION
             var dictionaryTexts = AssetManager.LoadAsset<DictionaryTextScriptableObject[]>("DictionaryText");
             if (dictionaryTexts != null)
             {
@@ -220,6 +221,9 @@ namespace Pearl.Ink
                 }
             }
             return null;
+#else
+            return jsonString;
+#endif
         }
 
         private Dictionary<string, string> GetCurrentTags()
@@ -246,7 +250,7 @@ namespace Pearl.Ink
 
             return complexTags;
         }
-        #endregion
+#endregion
     }
 }
 

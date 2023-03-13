@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.UI;
 
 namespace Pearl.Input
@@ -55,34 +56,33 @@ namespace Pearl.Input
         #region Direct 1 player
 
         #region Axis
-        public static Vector2 GetVectorAxis(in string actionString, in bool raw = false, Func<Vector2, Vector2> filter = null)
+        public static Vector2 GetVectorAxis(in string actionString, in bool raw = false, in bool ignoreBlock = false, Func<Vector2, Vector2> filter = null)
         {
             var inputInterface = Get(0);
             if (inputInterface != null)
             {
-                return inputInterface.GetVectorAxis(actionString, raw, filter);
+                return inputInterface.GetVectorAxis(actionString, raw, ignoreBlock, filter);
             }
             return default;
         }
 
-        public static Vector2 GetVectorAxis(in string actionString, Func<Vector2, Vector2> filter)
-        {
-            return GetVectorAxis(actionString, false, filter);
-        }
-
-        public static float GetAxis(in string actionString, in bool raw = false, Func<float, float> filter = null)
+        public void ClearAixsValue()
         {
             var inputInterface = Get(0);
             if (inputInterface != null)
             {
-                return inputInterface.GetAxis(actionString, raw, filter);
+                inputInterface.ClearAixsValue();
             }
-            return default;
         }
 
-        public static float GetAxis(in string actionString, Func<float, float> filter)
+        public static float GetAxis(in string actionString, in bool raw = false, in bool ignoreBlock = false, Func<float, float> filter = null)
         {
-            return GetAxis(actionString, false, filter);
+            var inputInterface = Get(0);
+            if (inputInterface != null)
+            {
+                return inputInterface.GetAxis(actionString, raw, ignoreBlock, filter);
+            }
+            return default;
         }
         #endregion
 

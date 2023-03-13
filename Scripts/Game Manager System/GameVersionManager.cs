@@ -83,8 +83,7 @@ namespace Pearl
             StorageManager.Load<GameVersionManager>(StorageTypeEnum.Hard);
             if (!_gameVersion.IsAlmostSpecificCount())
             {
-                _gameVersion = new();
-                _gameVersion.ClearAndAdd(0);
+                _gameVersion = _editorGameVersion;
             }
         }
     }

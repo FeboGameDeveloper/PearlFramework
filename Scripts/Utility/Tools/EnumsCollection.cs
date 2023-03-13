@@ -19,7 +19,7 @@
 
     public enum FuzzyBoolean { No = -1, IDoNo = 0, Yes = 1 }
 
-    public enum StateButton { Down, Up }
+    public enum StateButton { Down, Up, Press }
 
     public enum DeleteGameObjectEnum { Disable, Destroy }
 

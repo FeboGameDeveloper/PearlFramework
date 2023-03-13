@@ -23,7 +23,7 @@ namespace Pearl
         [SerializeField, ConditionalField("@useText")]
         private string aspectRatioText = "16:9";
 
-        [SerializeField, InspectorButton("ChangeAspectRatio")]
+        [SerializeField, InspectorButton("ChangeRatio")]
         private bool changeAspectRatio;
         #endregion
 
@@ -48,13 +48,11 @@ namespace Pearl
         }
         #endregion
 
-
         #region UnityCallbacks
         // Start is called before the first frame update
         protected void Start()
         {
-            ConvertText();
-            ChangeAspectRatio();
+            ChangeRatio();
         }
 
         protected void Reset()
@@ -64,6 +62,12 @@ namespace Pearl
         #endregion
 
         #region Private methods
+        private void ChangeRatio()
+        {
+            ConvertText();
+            ChangeAspectRatio();
+        }
+
         private void ConvertText()
         {
             if (useText)
@@ -94,7 +98,7 @@ namespace Pearl
 
         private void ChangeAspectRatio()
         {
-            Camera.main.rect = new Rect(0, 0, 1, 1);
+            cam.rect = new Rect(0, 0, 1, 1);
 
             if (cam != null)
             {
@@ -103,16 +107,15 @@ namespace Pearl
                     return;
                 }
 
-
                 var variance = aspectRatio / cam.aspect;
                 if (variance < 1.0)
                 {
-                    Camera.main.rect = new Rect((1.0f - variance) / 2.0f, 0, variance, 1.0f);
+                    cam.rect = new Rect((1.0f - variance) / 2.0f, 0, variance, 1.0f);
                 }
                 else
                 {
                     variance = 1.0f / variance;
-                    Camera.main.rect = new Rect(0, (1.0f - variance) / 2.0f, 1.0f, variance);
+                    cam.rect = new Rect(0, (1.0f - variance) / 2.0f, 1.0f, variance);
                 }
             }
         }

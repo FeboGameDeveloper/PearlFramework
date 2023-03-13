@@ -169,9 +169,8 @@ namespace Pearl
             try
             {
                 _genericAttribute = (PropertyAttribute)fieldInfo.GetCustomAttributes(typeof(PropertyAttribute), false)
-                    .FirstOrDefault(a => !(a is ConditionalFieldAttribute));
+                    .FirstOrDefault(a => a is not ConditionalFieldAttribute);
 
-                //TODO: wtf man
                 if (_genericAttribute is ContextMenuItemAttribute)
                 {
                     LogWarning("[ConditionalField] does not work with " + _genericAttribute.GetType(), property);
@@ -424,6 +423,19 @@ namespace Pearl
                 if (s[0] == '@' && s.Length > 1)
                 {
                     var v = s.Substring(1);
+
+                    var auxArray = v.Split(".");
+
+                    if (auxArray != null)
+                    {
+                        for (int j = 0; j < auxArray.Length; j++)
+                        {
+                            //WORKING IN PROGRESS
+
+                            // TODO: Fare in modo che prenda valori esterni
+                        }
+                    }
+
                     var val = ConditionalFieldUtility.FindRelativeProperty(property, v);
 
                     if (val == null)

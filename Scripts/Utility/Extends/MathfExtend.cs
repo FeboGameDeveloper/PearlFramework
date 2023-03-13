@@ -409,6 +409,7 @@ namespace Pearl
         {
             float max;
             float min;
+
             if (a > b)
             {
                 max = a;

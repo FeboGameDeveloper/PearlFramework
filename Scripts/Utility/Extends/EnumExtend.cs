@@ -131,18 +131,6 @@ namespace Pearl
             return default;
         }
 
-        public static T GetInverse<T>(T value) where T : struct, IConvertible
-        {
-            if (typeof(T).IsEnum && Enum.GetNames(typeof(T)).Length == 2)
-            {
-                int auxInteger = Convert.ToInt32(value);
-                auxInteger = MathfExtend.ChangeInCircle(auxInteger, 1, Length<T>());
-                return (T)Enum.ToObject(typeof(T), auxInteger);
-            }
-
-            return default;
-        }
-
         public static string[] GetArray(Type type)
         {
             if (type.IsEnum)
@@ -178,7 +166,7 @@ namespace Pearl
         {
             if (typeof(T).IsEnum)
             {
-                List<string> stringList = new List<string>();
+                List<string> stringList = new();
                 foreach (var en in listEnum)
                 {
                     stringList.Add(en.ToString());
