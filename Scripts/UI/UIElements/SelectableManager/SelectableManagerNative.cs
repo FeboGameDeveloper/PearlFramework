@@ -74,6 +74,7 @@ namespace Pearl.UI
             if (selectable != null && selectable.gameObject == FocusManager.GetFocus())
             {
                 FocusManager.SetFocusNull();
+                OnDeselect();
             }
 
             if (useFSM && FSM != null)

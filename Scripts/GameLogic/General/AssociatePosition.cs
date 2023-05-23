@@ -32,6 +32,18 @@ namespace Pearl
 
         public Vector3 Distance { get { return distance; } set { distance = value; } }
 
+        public Transform TargetTransform 
+        {
+            set 
+            { 
+                if (targetTransform != null)
+                {
+                    targetTransform.Component = value;
+                    _target = targetTransform.Component;
+                }
+            } 
+        }
+
         private bool _aux;
         private Transform _target;
 

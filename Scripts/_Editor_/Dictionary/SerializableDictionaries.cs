@@ -4,7 +4,7 @@ using Pearl.Input;
 using Pearl.UI;
 using System;
 using UnityEngine;
-using static Pearl.Debug.LogManager;
+using static Pearl.Testing.LogManager;
 using static Pearl.Editor.ButtonImageForCommandScriptableObject;
 using static Pearl.Editor.ButtonTextForCommandScriptableObject;
 

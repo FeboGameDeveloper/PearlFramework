@@ -17,7 +17,7 @@
         RigidBody,
     }
 
-    public enum FuzzyBoolean { No = -1, IDoNo = 0, Yes = 1 }
+    public enum FuzzyBoolean { False = -1, Unknow = 0, True = 1 }
 
     public enum StateButton { Down, Up, Press }
 

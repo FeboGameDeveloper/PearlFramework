@@ -1,4 +1,4 @@
-﻿using Pearl.Debug;
+﻿using Pearl.Testing;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -47,7 +47,7 @@ namespace Pearl
             this.name = name;
             this.value = value;
             paramterType = MemberEnum.Either;
-            this.staticMember = FuzzyBoolean.IDoNo;
+            this.staticMember = FuzzyBoolean.Unknow;
         }
 
         public ReflectionParameter(string name, object value, MemberEnum paramterType, FuzzyBoolean staticMember)
@@ -63,7 +63,7 @@ namespace Pearl
             this.name = name;
             this.value = value;
             this.paramterType = paramterType;
-            this.staticMember = FuzzyBoolean.IDoNo;
+            this.staticMember = FuzzyBoolean.Unknow;
         }
 
     }
@@ -71,18 +71,11 @@ namespace Pearl
     [Serializable]
     public struct NameClass
     {
-        public string namespaceString;
         public string classString;
+        public string namespaceString;
         public string assembly;
 
-        public NameClass(string namespaceString, string classString)
-        {
-            this.namespaceString = namespaceString;
-            this.classString = classString;
-            this.assembly = "";
-        }
-
-        public NameClass(string namespaceString, string classString, string assembly)
+        public NameClass(string classString, string namespaceString, string assembly)
         {
             this.namespaceString = namespaceString;
             this.classString = classString;
@@ -170,7 +163,7 @@ namespace Pearl
             }
             catch (Exception e)
             {
-                Debug.LogManager.Log(e);
+                Testing.LogManager.Log(e);
                 return default;
             }
         }
@@ -194,7 +187,7 @@ namespace Pearl
             }
             catch (Exception e)
             {
-                Debug.LogManager.Log(e);
+                Testing.LogManager.Log(e);
                 return default;
             }
         }
@@ -321,7 +314,16 @@ namespace Pearl
 
         public static MemberComplexInfo GetValueInfo(Type type, params string[] fieldsName)
         {
-            object container = GameObject.FindObjectOfType(type);
+            object container;
+            if (type.IsSubClass(typeof(UnityEngine.Object)))
+            {
+                container = GameObject.FindObjectOfType(type);
+            }
+            else
+            {
+                container = type;
+            }
+
 
             if (container != null && fieldsName.IsAlmostSpecificCount())
             {
@@ -469,7 +471,7 @@ namespace Pearl
             result = null;
             if (container != null && name != null)
             {
-                Type type = container.GetType();
+                Type type = (container is Type) ? (Type) container : container.GetType();
                 while ((result = type.GetField(name, bindingFlags)) == null && (type = type.BaseType) != null) ;
 
                 if (result != null)
@@ -751,7 +753,7 @@ namespace Pearl
         {
             if (parameter.paramterType == MemberEnum.Property)
             {
-                if (parameter.staticMember == FuzzyBoolean.Yes)
+                if (parameter.staticMember == FuzzyBoolean.True)
                 {
                     SetStaticProperty(container.GetType(), parameter.value, parameter.name);
                 }
@@ -762,7 +764,7 @@ namespace Pearl
             }
             else if (parameter.paramterType == MemberEnum.Field)
             {
-                if (parameter.staticMember == FuzzyBoolean.Yes)
+                if (parameter.staticMember == FuzzyBoolean.True)
                 {
                     SetStaticField(container.GetType(), parameter.value, parameter.name);
                 }
@@ -773,7 +775,7 @@ namespace Pearl
             }
             else if (parameter.paramterType == MemberEnum.Method)
             {
-                if (parameter.staticMember == FuzzyBoolean.Yes)
+                if (parameter.staticMember == FuzzyBoolean.True)
                 {
                     UseStaticMethod(container.GetType(), parameter.name, parameter.value);
                 }
@@ -784,7 +786,7 @@ namespace Pearl
             }
             else
             {
-                if (parameter.staticMember == FuzzyBoolean.Yes)
+                if (parameter.staticMember == FuzzyBoolean.True)
                 {
                     SetStaticValue(container.GetType(), parameter.value, parameter.name);
                 }
@@ -1256,7 +1258,7 @@ namespace Pearl
                     }
                     catch (Exception e)
                     {
-                        Debug.LogManager.LogWarning(e);
+                        Testing.LogManager.LogWarning(e);
                     }
                 }
                 else
@@ -1277,7 +1279,7 @@ namespace Pearl
 
                     if (obj == null)
                     {
-                        Debug.LogManager.LogWarning("Not Exist the specific constructor");
+                        Testing.LogManager.LogWarning("Not Exist the specific constructor");
                     }
                 }
 

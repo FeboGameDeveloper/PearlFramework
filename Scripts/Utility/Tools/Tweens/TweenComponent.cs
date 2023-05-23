@@ -81,11 +81,7 @@ namespace Pearl.Tweens
 
         private void OnValidate()
         {
-            if (container == null)
-            {
-                container = new();
-            }
-
+            container ??= new();
             container.Component = GetComponent<Container>();
         }
 

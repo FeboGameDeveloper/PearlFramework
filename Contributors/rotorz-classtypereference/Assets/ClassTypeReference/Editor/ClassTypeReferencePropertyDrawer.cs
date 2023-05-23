@@ -102,7 +102,7 @@ namespace TypeReferences
 
         #region Type Utility
 
-        private static Dictionary<string, Type> s_TypeMap = new Dictionary<string, Type>();
+        private static Dictionary<string, Type> s_TypeMap = new();
 
         private static Type ResolveType(string classRef)
         {
@@ -120,7 +120,7 @@ namespace TypeReferences
         #region Control Drawing / Event Handling
 
         private static readonly int s_ControlHint = typeof(ClassTypeReferencePropertyDrawer).GetHashCode();
-        private static GUIContent s_TempContent = new GUIContent();
+        private static GUIContent s_TempContent = new();
 
         private static string DrawTypeSelectionControl(Rect position, GUIContent label, string classRef, ClassTypeConstraintAttribute filter)
         {

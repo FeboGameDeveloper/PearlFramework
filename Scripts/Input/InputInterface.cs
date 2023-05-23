@@ -1,4 +1,5 @@
-﻿using Pearl.Events;
+﻿using NodeCanvas.BehaviourTrees;
+using Pearl.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,7 +7,9 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
+using static UnityEditorInternal.VersionControl.ListControl;
 using static UnityEngine.InputSystem.InputAction;
+using static UnityEngine.InputSystem.PlayerInput;
 
 namespace Pearl.Input
 {
@@ -73,7 +76,8 @@ namespace Pearl.Input
             public class ActionForDelegateInfo
             {
                 public Action action;
-                public bool trigger;
+                public bool interrunptInput = false;
+                public int order = 0;
 
                 public void AddAction(Action newAction)
                 {
@@ -125,8 +129,9 @@ namespace Pearl.Input
 
             private readonly Dictionary<InputAction, int> _inputActions = new();
             private readonly Dictionary<string, bool> _axisPastValue = new();
-            private readonly List<InputAction> _inputActionsInterrupt = new();
-            private readonly List<InputAction> _inputActionsBlock = new();
+
+            private bool _interrupt;
+            private readonly List<ActionForDelegateInfo> _actionsForInvoke = new();
             #endregion
 
             #region Properties
@@ -146,14 +151,27 @@ namespace Pearl.Input
             #endregion
 
             #region Public Methods
-            public void Update()
+            public void LateUpdate()
             {
-                foreach (var containerAction in _actionDelegates.Values)
-                {
-                    containerAction.trigger = false;
-                }
+                _interrupt = false;
 
-                _inputActionsInterrupt.Clear();
+                if (_actionsForInvoke.Count > 0)
+                {
+                    _actionsForInvoke.Sort((x, y) => x.order > y.order ? 1 : (x.order < y.order ? -1 : 0));
+
+                    for (int i = 0; i < _actionsForInvoke.Count; i++)
+                    {
+                        _actionsForInvoke[i]?.action?.Invoke();
+
+                        if (_interrupt)
+                        {
+                            break;
+                        }
+                    }
+
+                    _actionsForInvoke.Clear();
+                    _interrupt = false;
+                }
             }
 
             public void ClearAixsValue()
@@ -161,36 +179,26 @@ namespace Pearl.Input
                 _axisPastValue?.Clear();
             }
 
-            public void InterruptInput(in string actionString)
+            public void InterruptInput(in string actionString, string map = "")
             {
                 if (actionString != null)
                 {
-                    InputAction action = _actions.FindAction(actionString);
-                    if (action != null)
+                    InputAction action = null;
+                    if (map != string.Empty)
                     {
-                        _inputActionsInterrupt.Add(action);
+                        var mapAction = _actions.FindActionMap(map);
+                        if (mapAction != null)
+                        {
+                            action = mapAction.FindAction(actionString);
+                        }
+                    }
+                    else
+                    {
+                        action = _actions.FindAction(actionString);
                     }
                 }
             }
 
-            public void BlockInput(in string actionString, in bool block)
-            {
-                if (actionString != null)
-                {
-                    InputAction action = _actions.FindAction(actionString);
-                    if (action != null)
-                    {
-                        if (block)
-                        {
-                            _inputActionsBlock.AddOnce(action);
-                        }
-                        else
-                        {
-                            _inputActionsBlock.Remove(action);
-                        }
-                    }
-                }
-            }
 
             public Vector2 GetVectorAxis(in string actionString, in bool raw = false, bool ignoreBlock = false, Func<Vector2, Vector2> filter = null)
             {
@@ -200,7 +208,7 @@ namespace Pearl.Input
 
                     if (action != null)
                     {
-                        if (!ignoreBlock && (_inputActionsInterrupt.Contains(action) || _inputActionsBlock.Contains(action)) )
+                        if (!ignoreBlock)
                         {
                             return Vector2.zero;
                         }
@@ -224,7 +232,7 @@ namespace Pearl.Input
                             }
                             catch
                             {
-                                Debug.LogManager.Log("Wrong reader input");
+                                Testing.LogManager.Log("Wrong reader input");
                                 vector = Vector2.zero;
                             }
 
@@ -271,7 +279,7 @@ namespace Pearl.Input
 
                     if (action != null)
                     {
-                        if (!ignoreBlock && (_inputActionsInterrupt.Contains(action) || _inputActionsBlock.Contains(action)))
+                        if (!ignoreBlock)
                         {
                             return 0;
                         }
@@ -295,7 +303,7 @@ namespace Pearl.Input
                             }
                             catch
                             {
-                                Debug.LogManager.Log("Wrong reader input");
+                                Testing.LogManager.Log("Wrong reader input");
                                 value = 0;
                             }
 
@@ -334,39 +342,64 @@ namespace Pearl.Input
                 }
             }
 
-            public void PerformedHandle(in string actionString, in Action actionDown, in Action actionUp, in ActionEvent actionEvent, in string mapString = null)
+            public void ChangeInterrupt(bool interrupt)
             {
-                PerformedHandle(actionString, actionDown, actionEvent, StateButton.Down, mapString);
-                PerformedHandle(actionString, actionUp, actionEvent, StateButton.Up, mapString);
+                _interrupt = interrupt;
             }
 
-            public void PerformedHandle(in string actionString, in Action action, in ActionEvent actionEvent, StateButton stateButton = StateButton.Down, in string mapString = null)
+            public void ChangeInterrupt(bool interrunpt, in string actionString, in StateButton stateButton, in string mapString = null)
             {
-                if (actionString != null && action != null && _actions != null)
+                if (actionString != null && _actions != null)
                 {
-                    InputAction inputAction = null;
-                    if (mapString == null || mapString == string.Empty)
-                    {
-                        inputAction = _actions.FindAction(actionString);
-                    }
-                    else
-                    {
-                        var newMap = _actions.FindActionMap(mapString);
-                        if (newMap != null)
-                        {
-                            inputAction = newMap.FindAction(actionString);
-                        }
-                    }
+                    InputAction inputAction = FindAction(actionString, mapString);
 
                     if (inputAction != null)
                     {
-                        if (_inputActionsInterrupt.Contains(inputAction) || _inputActionsBlock.Contains(inputAction))
+                        var map = inputAction.actionMap;
+                        DelegateInfo delegateInfo = new(actionString + map, stateButton);
+                        if (_actionDelegates.TryGetValue(delegateInfo, out var actionContainer))
                         {
-                            return;
+                            actionContainer.interrunptInput = interrunpt;
                         }
+                    }
+                }
+            }
 
+            public void ChangeOrder(int order, in string actionString, in StateButton stateButton, in string mapString = null)
+            {
+                if (actionString != null && _actions != null)
+                {
+                    InputAction inputAction = FindAction(actionString, mapString);
 
-                        DelegateInfo delegateInfo = new(actionString, stateButton);
+                    if (inputAction != null)
+                    {
+                        var map = inputAction.actionMap;
+                        DelegateInfo delegateInfo = new(actionString + map, stateButton);
+                        if (_actionDelegates.TryGetValue(delegateInfo, out var actionContainer))
+                        {
+                            actionContainer.order = order;
+                        }
+                    }
+                }
+            }
+
+            public void PerformedHandle(in string actionString, in Action actionDown, in Action actionUp, in ActionEvent actionEvent, in string mapString = null, in int order = 0)
+            {
+                PerformedHandle(actionString, actionDown, actionEvent, StateButton.Down, mapString, order);
+                PerformedHandle(actionString, actionUp, actionEvent, StateButton.Up, mapString, order);
+            }
+
+            public void PerformedHandle(in string actionString, in Action action, in ActionEvent actionEvent, StateButton stateButton = StateButton.Down, in string mapString = null, in int order = 0)
+            {
+                if (actionString != null && action != null && _actions != null)
+                {
+                    InputAction inputAction = FindAction(actionString, mapString);
+
+                    if (inputAction != null)
+                    {
+                        var map = inputAction.actionMap;
+
+                        DelegateInfo delegateInfo = new(actionString + map, stateButton);
                         bool isFound = _actionDelegates.TryGetValue(delegateInfo, out var actionContainer);
 
                         if (actionEvent == ActionEvent.Add)
@@ -389,6 +422,7 @@ namespace Pearl.Input
                                 _actionDelegates.Add(delegateInfo, actionContainer);
                             }
                             actionContainer.AddAction(action);
+                            actionContainer.order = order;
                         }
                         else if (isFound)
                         {
@@ -434,14 +468,17 @@ namespace Pearl.Input
             #region Private Methods
             private void InvokeAction(CallbackContext context)
             {
-                if (!Enable)
+                if (!Enable || _interrupt)
                 {
                     return;
                 }
 
+
                 if (context.action != null)
                 {
                     string inputActonString = context.action.name;
+                    var mapAction = context.action.actionMap;
+
 
                     if (context.action.actionMap != null && _mapsBlock.IsAlmostSpecificCount())
                     {
@@ -453,14 +490,36 @@ namespace Pearl.Input
                     }
 
                     StateButton stateButton = context.control.IsPressed() && !context.canceled ? StateButton.Down : StateButton.Up;
-                    DelegateInfo delegateInfo = new(inputActonString, stateButton);
+                    DelegateInfo delegateInfo = new(inputActonString + mapAction, stateButton);
 
-                    if (_actionDelegates.TryGetValue(delegateInfo, out var actionContainer) && !actionContainer.trigger)
+                    if (_actionDelegates.TryGetValue(delegateInfo, out var actionContainer))
                     {
-                        actionContainer.trigger = true;
-                        actionContainer.action?.Invoke();
+                        if (actionContainer.interrunptInput)
+                        {
+                            _actionsForInvoke.Clear();
+                            _interrupt = true;
+                        }
+                        
+                        _actionsForInvoke.Add(actionContainer);
                     }
                 }
+            }
+
+            private InputAction FindAction(in string actionString, in string mapString = null)
+            {
+                if (mapString == null || mapString == string.Empty)
+                {
+                    return _actions.FindAction(actionString);
+                }
+                else
+                {
+                    var newMap = _actions.FindActionMap(mapString);
+                    if (newMap != null)
+                    {
+                        return newMap.FindAction(actionString);
+                    }
+                }
+                return null;
             }
             #endregion
         }
@@ -532,11 +591,11 @@ namespace Pearl.Input
             AddUIModule(InputManager.InputSystemUI);
         }
 
-        protected void Update()
+        protected void LateUpdate()
         {
             if (_inputState != null)
             {
-                _inputState.Update();
+                _inputState.LateUpdate();
             }
         }
 
@@ -554,16 +613,6 @@ namespace Pearl.Input
         #endregion
 
         #region Public methods
-
-        public void InterruptInput(in string actionString)
-        {
-            _inputState?.InterruptInput(actionString);
-        }
-
-        public void BlockInput(in string actionString, in bool block)
-        {
-            _inputState?.BlockInput(actionString, block);
-        }
 
         #region Axis
         public void ClearAixsValue()
@@ -614,30 +663,54 @@ namespace Pearl.Input
         #endregion
 
         #region Button
-        public void PerformedHandle(in InputInfo inputInfo, in Action actionDown, in Action actionUp, in ActionEvent actionEvent)
+        public void PerformedHandle(in InputInfo inputInfo, in Action actionDown, in Action actionUp, in ActionEvent actionEvent, in int order = 0)
         {
-            PerformedHandle(inputInfo.nameInput, actionDown, actionUp, actionEvent, inputInfo.nameMap);
+            PerformedHandle(inputInfo.nameInput, actionDown, actionUp, actionEvent, inputInfo.nameMap, order);
         }
 
-        public void PerformedHandle(in string actionString, in Action actionDown, in Action actionUp, in ActionEvent actionEvent, in string mapString = null)
+        public void PerformedHandle(in string actionString, in Action actionDown, in Action actionUp, in ActionEvent actionEvent, in string mapString = null, in int order = 0)
         {
             if (_inputState != null && actionString != null)
             {
-                _inputState.PerformedHandle(actionString.CamelCase(), actionDown, actionUp, actionEvent, mapString);
+                _inputState.PerformedHandle(actionString.CamelCase(), actionDown, actionUp, actionEvent, mapString, order);
             }
         }
 
-        public void PerformedHandle(in string actionString, in Action action, in ActionEvent actionEvent, StateButton stateButton = StateButton.Down, in string mapString = null)
+        public void ChangeInterrupt(bool interrupt, in string actionString, in StateButton stateButton, in string mapString = null)
+        {
+            if (_inputState != null)
+            {
+                _inputState.ChangeInterrupt(interrupt, actionString, stateButton, mapString);
+            }
+        }
+
+        public void ChangeInterrunpt(bool interrupt)
+        {
+            if (_inputState != null)
+            {
+                _inputState.ChangeInterrupt(interrupt);
+            }
+        }
+
+        public void ChangeOrder(int order, in string actionString, in StateButton stateButton, in string mapString = null)
+        {
+            if (_inputState != null)
+            {
+                _inputState. ChangeOrder(order, actionString, stateButton, mapString);
+            }
+        }
+
+        public void PerformedHandle(in string actionString, in Action action, in ActionEvent actionEvent, StateButton stateButton = StateButton.Down, in string mapString = null, in int order = 0)
         {
             if (_inputState != null && actionString != null)
             {
-                _inputState.PerformedHandle(actionString.CamelCase(), action, actionEvent, stateButton, mapString);
+                _inputState.PerformedHandle(actionString.CamelCase(), action, actionEvent, stateButton, mapString, order);
             }
         }
 
-        public void PerformedHandle(in InputInfo inputInfo, in Action action, in ActionEvent actionEvent, StateButton stateButton = StateButton.Down)
+        public void PerformedHandle(in InputInfo inputInfo, in Action action, in ActionEvent actionEvent, StateButton stateButton = StateButton.Down, in int order = 0)
         {
-            PerformedHandle(inputInfo.nameInput, action, actionEvent, stateButton, inputInfo.nameMap);
+            PerformedHandle(inputInfo.nameInput, action, actionEvent, stateButton, inputInfo.nameMap, order);
         }
         #endregion
 

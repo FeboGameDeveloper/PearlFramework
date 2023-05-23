@@ -1,6 +1,7 @@
 ﻿using Pearl.Events;
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Pearl.UI
 {
@@ -107,17 +108,22 @@ namespace Pearl.UI
 #endif
         }
 
-        public static void Quit()
+        public void Quit()
         {
             GameManager.Quit();
         }
 
-        public static void ChangePage()
+        public void RepeatScene()
+        {
+            SceneSystemManager.RepeasScene();
+        }
+
+        public void ChangePage()
         {
             ChangePage(null);
         }
 
-        public static void ChangePage(string label)
+        public void ChangePage(string label)
         {
             if (string.IsNullOrEmpty(label))
             {

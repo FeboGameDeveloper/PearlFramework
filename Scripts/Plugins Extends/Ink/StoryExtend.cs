@@ -1,9 +1,10 @@
 ﻿#if INK
 
 using Ink.Runtime;
-using Pearl.Debug;
+using Pearl.Testing;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 namespace Pearl.Ink
@@ -135,6 +136,17 @@ namespace Pearl.Ink
                 {
                     LogManager.LogWarning(e);
                 }
+            }
+        }
+
+        public void SetVar(string var, string newValue)
+        {
+            var parameters = new object[1];
+            parameters[0] = newValue;
+
+            if (_story)
+            {
+                _story.EvaluateFunction(var, newValue);
             }
         }
 

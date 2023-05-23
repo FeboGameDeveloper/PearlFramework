@@ -12,6 +12,11 @@ namespace Pearl
 
         #region WaitForMethod
 
+        public static int TimerCount
+        {
+            get { return _timers != null ? _timers.Count : 0; }
+        }
+
         #region stop
         public static void StopTimer(Action action)
         {

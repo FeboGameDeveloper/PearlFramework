@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Pearl.Debug
+namespace Pearl.Testing
 {
     public class LogManager : PearlBehaviour, ISingleton
     {

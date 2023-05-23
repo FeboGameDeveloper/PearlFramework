@@ -217,6 +217,11 @@ namespace Pearl.ClockManager
             return !on || Time >= _limit;
         }
 
+        public bool IsFinish(out float differenceRight)
+        {
+            return IsFinish(out float differenceLeft, out differenceRight);
+        }
+
         /// <summary>
         /// Is the timer finished?
         /// </summary>

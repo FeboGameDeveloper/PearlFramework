@@ -251,7 +251,7 @@ namespace Pearl.Storage
             }
             catch (Exception e)
             {
-                Debug.LogManager.Log(e);
+                Testing.LogManager.Log(e);
             }
 
             if (result == null)

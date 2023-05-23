@@ -87,30 +87,57 @@ namespace Pearl.Input
         #endregion
 
         #region Button
-        public static void PerformedHandle(in InputInfo inputInfo, in Action actionDown, in Action actionUp, in ActionEvent actionEvent)
+        public static void PerformedHandle(in InputInfo inputInfo, in Action actionDown, in Action actionUp, in ActionEvent actionEvent, in int order = 0)
         {
             var inputInterface = Get(0);
             if (inputInterface != null)
             {
-                inputInterface.PerformedHandle(inputInfo, actionDown, actionUp, actionEvent);
+                inputInterface.PerformedHandle(inputInfo, actionDown, actionUp, actionEvent, order);
             }
         }
 
-        public static void PerformedHandle(in string actionString, in Action actionDown, in Action actionUp, in ActionEvent actionEvent, in string mapString = null)
+        public static void ChangeInterrupt(bool interrunpt, in string actionString, in StateButton stateButton, in string mapString = null)
         {
             var inputInterface = Get(0);
             if (inputInterface != null)
             {
-                inputInterface.PerformedHandle(actionString, actionDown, actionUp, actionEvent, mapString);
+                inputInterface.ChangeInterrupt(interrunpt, actionString, stateButton, mapString);
             }
         }
 
-        public static void PerformedHandle(in string actionString, in Action action, in ActionEvent actionEvent, StateButton stateButton = StateButton.Down, in string mapString = null)
+        public static void ChangeInterrupt(bool interrupt)
         {
             var inputInterface = Get(0);
             if (inputInterface != null)
             {
-                inputInterface.PerformedHandle(actionString, action, actionEvent, stateButton, mapString);
+                inputInterface.ChangeInterrunpt(interrupt);
+            }
+        }
+
+        public static void ChangeOrder(int order, in string actionString, in StateButton stateButton, in string mapString = null)
+        {
+            var inputInterface = Get(0);
+            if (inputInterface != null)
+            {
+                inputInterface.ChangeOrder(order, actionString, stateButton, mapString);
+            }
+        }
+
+        public static void PerformedHandle(in string actionString, in Action actionDown, in Action actionUp, in ActionEvent actionEvent, in string mapString = null, in int order = 0)
+        {
+            var inputInterface = Get(0);
+            if (inputInterface != null)
+            {
+                inputInterface.PerformedHandle(actionString, actionDown, actionUp, actionEvent, mapString, order);
+            }
+        }
+
+        public static void PerformedHandle(in string actionString, in Action action, in ActionEvent actionEvent, StateButton stateButton = StateButton.Down, in string mapString = null, in int order = 0)
+        {
+            var inputInterface = Get(0);
+            if (inputInterface != null)
+            {
+                inputInterface.PerformedHandle(actionString, action, actionEvent, stateButton, mapString, order);
             }
         }
 
@@ -134,7 +161,7 @@ namespace Pearl.Input
             }
         }
 
-        public void BlockMap(in string map, LockEnum lockState, params string[] actionsException)
+        public static void BlockMap(in string map, LockEnum lockState, params string[] actionsException)
         {
             var inputInterface = Get(0);
             if (inputInterface != null)
@@ -294,7 +321,7 @@ namespace Pearl.Input
             }
             else
             {
-                Debug.LogManager.LogWarning("The player isn't exist", "Input");
+                Testing.LogManager.LogWarning("The player isn't exist", "Input");
             }
             return null;
         }

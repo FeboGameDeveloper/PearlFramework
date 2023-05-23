@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 
 namespace Pearl
@@ -45,6 +46,15 @@ namespace Pearl
             }
         }
         #endregion
+
+        public static int RaycastNonAlloc(Vector2 origin, Vector2 direction, RaycastHit2D[] result, bool clearArrayBeforeSearch = false)
+        {
+            if (clearArrayBeforeSearch)
+            {
+                result.ClearAll();
+            }
+            return Physics2D.RaycastNonAlloc(origin, direction, result);
+        }
 
         public static void SetVelocity(this Rigidbody2D @this, out bool isFinish, Vector2 velocity, Transform finalTransform, float neighbourhood = 0)
         {

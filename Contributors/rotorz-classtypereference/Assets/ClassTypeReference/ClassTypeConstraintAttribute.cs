@@ -134,9 +134,10 @@ namespace TypeReferences
         /// Initializes a new instance of the <see cref="ClassImplementsAttribute"/> class.
         /// </summary>
         /// <param name="interfaceType">Type of interface that selectable classes must implement.</param>
-        public ClassImplementsAttribute(Type interfaceType)
+        public ClassImplementsAttribute(Type interfaceType, bool includeParent = false)
         {
             InterfaceType = interfaceType;
+            IncludeParent = includeParent;
         }
 
         /// <summary>
@@ -144,12 +145,14 @@ namespace TypeReferences
         /// </summary>
         public Type InterfaceType { get; private set; }
 
+        public bool IncludeParent { get; private set; }
+
         /// <inheritdoc/>
         public override bool IsConstraintSatisfied(Type type)
         {
             if (base.IsConstraintSatisfied(type))
             {
-                if (InterfaceType == type || type.IsSubclassOf(InterfaceType))
+                if ( (IncludeParent && InterfaceType == type) || type.IsSubclassOf(InterfaceType))
                 {
                     return true;
                 }

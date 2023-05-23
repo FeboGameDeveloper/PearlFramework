@@ -40,12 +40,12 @@ namespace Pearl.Examples.Text
 
         public void GlobalMethod()
         {
-            Pearl.Debug.LogManager.Log("Test");
+            Pearl.Testing.LogManager.Log("Test");
         }
 
         public void Method1(string name, string value)
         {
-            Pearl.Debug.LogManager.Log(name + "  " + value);
+            Pearl.Testing.LogManager.Log(name + "  " + value);
             Invoke("Wait", 1);
         }
 
@@ -56,12 +56,12 @@ namespace Pearl.Examples.Text
 
         public void Method2()
         {
-            Pearl.Debug.LogManager.Log("Finish");
+            Pearl.Testing.LogManager.Log("Finish");
         }
 
         public void Method3()
         {
-            Pearl.Debug.LogManager.Log("Start");
+            Pearl.Testing.LogManager.Log("Start");
         }
 
     }

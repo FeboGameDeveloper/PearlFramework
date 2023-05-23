@@ -12,6 +12,8 @@ using UnityEngine.EventSystems;
 
 namespace Pearl
 {
+    public enum StateText { Null, Dictated, Waiting }
+
     public class TextManager : MonoBehaviour, IPause, IPointerClickHandler
     {
         protected enum PositionMark { Start, End }
@@ -42,7 +44,6 @@ namespace Pearl
         private bool dontVisualizeWithErrorLocalization = true;
         [SerializeField]
         protected string tableString = "";
-
 #endif
 
         [Header("General")]
@@ -77,7 +78,6 @@ namespace Pearl
         #endregion
 
         #region Events
-        public StringEvent OnLinkEvent;
         public UnityEvent OnStartWriteText;
         public UnityEvent OnFinishWriteText;
         public event Action<string, string> OnEvent;
@@ -102,12 +102,14 @@ namespace Pearl
         protected static readonly string[] unityTags;
         private static bool isInitStatic = true;
 
+        protected StateText _currentState = StateText.Null;
+
         private float pastSpeedText;
         private float waitIme = 0f;
         private readonly Dictionary<string, string> localStringVars = new();
 
         private bool isStandardMark = false;
-        private bool _skipText;
+        protected bool _skipText;
         private SpaceBlockText _blockText = SpaceBlockText.Null;
         protected string _stampText = string.Empty;
         private PearlEventType _typeEventCurrent;
@@ -123,7 +125,7 @@ namespace Pearl
 #if LOCALIZATION
         private bool useLocalization = false;
 #endif
-        PearlWaitForSeconds _waitForSeconds;
+        private PearlWaitForSeconds _waitForSeconds;
         #endregion
 
         #region Property
@@ -132,6 +134,11 @@ namespace Pearl
         public string TableString
         {
             set { tableString = value; }
+        }
+
+        public StateText CurrentState
+        {
+            get { return _currentState; }
         }
 
         public bool Localize
@@ -465,7 +472,7 @@ namespace Pearl
         }
         #endregion
 
-        public void SkipText()
+        public virtual void SkipText()
         {
             _skipText = true;
         }
@@ -595,6 +602,7 @@ namespace Pearl
         #region AnalizeTest
         protected IEnumerator PrePrintText()
         {
+            _currentState = StateText.Dictated;
             if (_auxText != null)
             {
                 float _delta = 0;
@@ -631,6 +639,8 @@ namespace Pearl
                     }
                 }
             }
+
+            _currentState = StateText.Waiting;
 
             if (_blockText != SpaceBlockText.Null)
             {
@@ -733,7 +743,7 @@ namespace Pearl
                     }
                     catch (Exception e)
                     {
-                        Debug.LogManager.LogWarning(e);
+                        Testing.LogManager.LogWarning(e);
                         currentSpeedText = 0;
                     }
                 }
@@ -830,10 +840,11 @@ namespace Pearl
             OnFinishText();
         }
 
-        protected void OnFinishText()
+        protected virtual void OnFinishText()
         {
-            if (waitTextAdEnd)
+            if (waitTextAdEnd && !isDictated)
             {
+                _currentState = StateText.Waiting;
                 int count = _auxText != null ? _auxText.Trim().Length : 0;
                 PearlInvoke.WaitForMethod(count * timeForCharacter, FinishText);
             }
@@ -843,7 +854,7 @@ namespace Pearl
             }
         }
 
-        private void FinishText()
+        protected virtual void FinishText()
         {
             if (deleteTextAtEnd)
             {
@@ -897,7 +908,7 @@ namespace Pearl
             PrintText(string.Empty);
         }
 
-        private void ResetTextContainer()
+        protected virtual void ResetTextContainer()
         {
             _auxText = null;
             _stampText = string.Empty;
@@ -906,11 +917,10 @@ namespace Pearl
             waitIme = 0.0f;
             StopAllCoroutines();
             PearlInvoke.StopTimer(OnFinishText);
+            PearlInvoke.StopTimer(FinishText);
+            _currentState = StateText.Null;
 
-            if (speedTextHistory != null)
-            {
-                speedTextHistory.Clear();
-            }
+            speedTextHistory?.Clear();
 
             currentSpeedText = speedTextDefault;
         }
@@ -946,10 +956,6 @@ namespace Pearl
             if (OnlineExtend.CheckURLValid(linkId))
             {
                 Application.OpenURL(linkId);
-            }
-            else
-            {
-                OnLinkEvent?.Invoke(linkId);
             }
         }
         #endregion

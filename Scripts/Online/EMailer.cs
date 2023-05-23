@@ -118,7 +118,7 @@ namespace Pearl
             ServicePointManager.ServerCertificateValidationCallback = delegate
             (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
             {
-                Debug.LogManager.Log("Email success with port " + smtpClient.port + "!");
+                Testing.LogManager.Log("Email success with port " + smtpClient.port + "!");
                 return true;
             };
 
@@ -129,12 +129,12 @@ namespace Pearl
             }
             catch (System.Exception e)
             {
-                Debug.LogManager.Log("Email error with port " + smtpClient.port + ": " + e.Message);
+                Testing.LogManager.Log("Email error with port " + smtpClient.port + ": " + e.Message);
                 return false;
             }
             finally
             {
-                Debug.LogManager.Log("Email sent!");
+                Testing.LogManager.Log("Email sent!");
             }
 
             return true;

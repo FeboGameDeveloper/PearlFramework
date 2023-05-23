@@ -7,7 +7,6 @@ namespace Pearl
     {
         [SerializeField]
         private SemiAxis2DEnum currentAxis = SemiAxis2DEnum.Up;
-        private float _currentStep;
 
         public override int CalculateDistance(SortingOrderData sorter)
         {
@@ -16,8 +15,7 @@ namespace Pearl
                 return 0;
             }
 
-            float currentAxisValue = 0;
-
+            float currentAxisValue;
             Vector2 viewportPoint = cam.WorldToViewportPoint(sorter.transform.position);
             int maxSortingLayer = SpriteRenderExtend.MaxSortingLayer;
 

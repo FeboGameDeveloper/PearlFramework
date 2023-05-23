@@ -1,4 +1,4 @@
-﻿using Pearl.Debug;
+﻿using Pearl.Testing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -381,6 +381,18 @@ namespace Pearl
             return result;
         }
 
+        public static List<int> FindAllIndex<T>(this ICollection<T> @this, Func<int, bool> findMethod)
+        {
+            if (@this == null || findMethod == null)
+            {
+                return default;
+            }
+
+            return Enumerable.Range(0, @this.Count).Where(findMethod).ToList();
+        }
+
+
+
         public static ICollection<T> ReturnNewCollectionsWithoutElements<T>(this ICollection<T> @this, params T[] exception)
         {
             List<T> exceptionList = new(exception);
@@ -402,7 +414,7 @@ namespace Pearl
         {
             if (getIndex == null || @this == null)
             {
-                Debug.LogManager.LogWarning("GetIndexAvoiedProgresion error");
+                Testing.LogManager.LogWarning("GetIndexAvoiedProgresion error");
                 return default;
             }
 

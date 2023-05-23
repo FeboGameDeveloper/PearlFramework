@@ -1,4 +1,4 @@
-﻿using Pearl.Debug;
+﻿using Pearl.Testing;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +13,7 @@ namespace Pearl.Tweens
         #region Static
 
         #region Private Fields
-        private readonly static SimplePool<TweenContainer> _containerPool = new(false);
+        private readonly static SimplePool<TweenContainer> _tweenPool = new(false);
         private readonly static List<TweenContainer> _tweenActiveList = new();
         #endregion
 
@@ -26,7 +26,7 @@ namespace Pearl.Tweens
         //to create a tween: To do after awake
         public static TweenContainer CreateTween(Func<Vector4> currentValue, float timeOrVelocity, Action<Vector4> setAction, bool isAutoKill, AnimationCurveInfo curve, ChangeModes changeMode, params Vector4[] newValue)
         {
-            TweenContainer tweenContainer = _containerPool.Get();
+            TweenContainer tweenContainer = _tweenPool.Get();
 
             if (tweenContainer != null)
             {
@@ -51,7 +51,10 @@ namespace Pearl.Tweens
 
             for (int i = _tweenActiveList.Count - 1; i >= 0; i--)
             {
-                _tweenActiveList[i]?.Evalutate();
+                if (_tweenActiveList.Count > 0)
+                {
+                    _tweenActiveList[i]?.Evalutate();
+                }
             }
         }
 
@@ -65,7 +68,7 @@ namespace Pearl.Tweens
             if (tweenContainer != null)
             {
                 _tweenActiveList.Remove(tweenContainer);
-                _containerPool.Remove(tweenContainer);
+                _tweenPool.Remove(tweenContainer);
             }
         }
 

@@ -16,7 +16,9 @@ namespace Pearl
         [SerializeField]
         private bool isOnApplicationPause = true;
         [SerializeField]
-        private string pauseInputMap = "UI";
+        protected string pauseInputMap = "UI";
+        [SerializeField]
+        protected string gameplayInputMap = "Gameplay";
 
 #if NODE_CANVAS
         [SerializeField]
@@ -26,7 +28,10 @@ namespace Pearl
         [ReadOnly]
         [SerializeField]
         protected StateLevelEnum _stateLevel = StateLevelEnum.InGame;
-        private Action _functionPause;
+
+
+        protected Action _functionPause;
+        protected Action _functionUnpause;
 
 
 
@@ -77,14 +82,10 @@ namespace Pearl
             base.Start();
 
             _functionPause = () => CallPause(true);
+            _functionUnpause = () => CallPause(false);
 
             PearlEventsManager.AddAction(ConstantStrings.Gameover, OnGameOver);
             PearlEventsManager.AddAction<bool>(ConstantStrings.Pause, CallPause);
-            var input = InputManager.Input;
-            if (input)
-            {
-                input.PerformedHandle(ConstantStrings.Pause, _functionPause, ActionEvent.Add, StateButton.Down, pauseInputMap);
-            }
         }
 
         protected override void OnEnable()
@@ -97,13 +98,9 @@ namespace Pearl
         protected override void OnDestroy()
         {
             base.OnDestroy();
+
             PearlEventsManager.RemoveAction(ConstantStrings.Gameover, OnGameOver);
             PearlEventsManager.RemoveAction<bool>(ConstantStrings.Pause, CallPause);
-            var input = InputManager.Input;
-            if (input)
-            {
-                input.PerformedHandle(ConstantStrings.Pause, _functionPause, ActionEvent.Remove, StateButton.Down, pauseInputMap);
-            }
         }
 
 
@@ -136,10 +133,12 @@ namespace Pearl
 
                 if (pause)
                 {
+                    StateLevel = StateLevelEnum.Pause;
                     manager.PauseInternal();
                 }
                 else
                 {
+                    StateLevel = StateLevelEnum.InGame;
                     manager.UnpauseInternal();
                 }
             }
@@ -155,6 +154,26 @@ namespace Pearl
         protected abstract void PauseInternal();
 
         protected abstract void UnpauseInternal();
+
+
+        public void OnCallPause(bool pause)
+        {
+            InputManager.ChangeInterrupt(true);
+            CallPause(pause);
+        }
+
+        public void OnCallPause()
+        {
+            InputManager.ChangeInterrupt(true);
+            if (StateLevel == StateLevelEnum.Pause)
+            {
+                CallPause(false);
+            }
+            else
+            {
+                CallPause(true);
+            }
+        }
     }
 
 }

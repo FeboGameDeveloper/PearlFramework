@@ -14,12 +14,16 @@ namespace Pearl.UI
         [SerializeField]
         private bool setLayerFocusOnEnable = false;
         [SerializeField]
+        private bool setFocusOnEnable = false;
+        [SerializeField]
         private bool deleteStorageGroupAtDestroy = false;
 
         [SerializeField]
         private bool clickForNewFocus = false;
         [SerializeField, ConditionalField("@clickForNewFocus")]
         private bool useFocusGroup = false;
+        [SerializeField, ConditionalField("@setFocusOnEnable")]
+        private GameObject focusOnEnable = null;
         [SerializeField, ConditionalField("@clickForNewFocus && !@useFocusGroup")]
         private GameObject newFocusOnClick = null;
         [SerializeField, ConditionalField("@clickForNewFocus && @useFocusGroup")]
@@ -38,6 +42,11 @@ namespace Pearl.UI
             if (gameObject.TryGetComponent<IPearlSelectable>(out var component))
             {
                 component.OnSelected += OnSelected;
+            }
+
+            if (setFocusOnEnable)
+            {
+                FocusManager.SetFocus(focusOnEnable);
             }
 
             base.OnEnable();

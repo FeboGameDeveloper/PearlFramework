@@ -9,12 +9,13 @@ namespace Pearl
     public static class DialogsManager
     {
         private static readonly SimplePool<Dialog> _pool = new(false);
-        private static readonly Dictionary<string, Dialog> _dialogs = new();
+        private static readonly Dictionary<int, Dialog> _dialogs = new();
+        private static readonly IndexManager _indexManager = new();
 
         #region Public Methods
-        public static void AddEvent(in string idDIalog, Action<string> action, StartFinish typeEnum)
+        public static void AddEvent(in int IDDialog, Action<string> action, StartFinish typeEnum)
         {
-            var dialog = GetDialog(idDIalog);
+            var dialog = GetDialog(IDDialog);
             if (dialog != null)
             {
                 if (typeEnum == StartFinish.Start)
@@ -28,9 +29,9 @@ namespace Pearl
             }
         }
 
-        public static void RemoveEvent(in string idDIalog, Action<string> action, StartFinish typeEnum)
+        public static void RemoveEvent(in int IDDialog, Action<string> action, StartFinish typeEnum)
         {
-            var dialog = GetDialog(idDIalog);
+            var dialog = GetDialog(IDDialog);
             if (dialog != null)
             {
                 if (typeEnum == StartFinish.Start)
@@ -44,58 +45,64 @@ namespace Pearl
             }
         }
 
-        public static void ReadNextText(in string idDialog)
+        public static void SetVar(in int IDDialog, string var, string newValue)
         {
-            var dialog = GetDialog(idDialog);
-            if (dialog != null)
-            {
-                dialog.ReadNextText();
-            }
+            var dialog = GetDialog(IDDialog);
+            dialog?.SetVar(var, newValue);
         }
 
-        public static void ChangePath(in string idDialog, in string path)
+        public static void ReadNextText(in int IDDialog)
         {
-            var dialog = GetDialog(idDialog);
-            if (dialog != null)
-            {
-                dialog.ChangePath(path);
-            }
+            var dialog = GetDialog(IDDialog);
+            dialog?.ReadNextText();
         }
 
-        public static bool CreateDialog(in StoryIndex storyIndex, in string idDialog, in Action<TextStruct> actionText, Action finishText, in string stingTable = null)
+        public static void RepeatText(in int IDDialog)
         {
-            return CreateDialog(storyIndex, idDialog, actionText, finishText, null, stingTable);
+            var dialog = GetDialog(IDDialog);
+            dialog?.ReadNextText(true);
         }
 
-        public static bool CreateDialog(in StoryIndex storyIndex, in string idDialog, in Action<TextStruct> actionText, Action finishText, in Action<QuestionInfo> actionQuestion, in string stingTable = null)
+        public static void ChangePath(in int IDDialog, in string path)
         {
-            if (_pool != null && _dialogs != null && !_dialogs.ContainsKey(idDialog))
+            var dialog = GetDialog(IDDialog);
+            dialog?.ChangePath(path);
+        }
+
+        public static bool CreateDialog(in StoryIndex storyIndex, out int IDDialog, in Action<TextStruct> actionText, Action finishText, in string stingTable = null)
+        {
+            return CreateDialog(storyIndex, out IDDialog, actionText, finishText, null, stingTable);
+        }
+
+        public static bool CreateDialog(in StoryIndex storyIndex, out int IDDialog, in Action<TextStruct> actionText, Action finishText, in Action<QuestionInfo> actionQuestion, in string stingTable = null)
+        {
+            if (_pool != null && _dialogs != null)
             {
                 var dialog = _pool.Get();
 
                 finishText += () => FinishDialog(dialog);
-                if (dialog != null)
+                if (dialog != null && _indexManager != null)
                 {
-                    _dialogs.Add(idDialog, dialog);
+                    IDDialog = _indexManager.GetIndex();
+                    _dialogs.Add(IDDialog, dialog);
                     dialog.CreateDialog(storyIndex, actionText, finishText, stingTable, actionQuestion);
                     return true;
                 }
             }
+
+            IDDialog = -1;
             return false;
         }
 
-        public static void ForceDialog(in string idDialog)
+        public static void ForceDialog(in int IDDialog)
         {
-            var dialog = GetDialog(idDialog);
-            if (dialog != null)
-            {
-                dialog.FinishDialog();
-            }
+            var dialog = GetDialog(IDDialog);
+            dialog?.FinishDialog();
         }
 
-        public static Dialog GetDialog(string idDialog)
+        public static Dialog GetDialog(in int IDDialog)
         {
-            if (_dialogs.IsNotNullAndTryGetValue(idDialog, out var dialog))
+            if (_dialogs.IsNotNullAndTryGetValue(IDDialog, out var dialog))
             {
                 return dialog;
             }
@@ -106,10 +113,11 @@ namespace Pearl
         #region Private Methods
         private static void FinishDialog(Dialog dialog)
         {
-            if (_dialogs.TryGetKey(dialog, out var textEvent))
+            if (_indexManager != null && _dialogs.TryGetKey(dialog, out var IDdialog))
             {
-                _dialogs.Remove(textEvent);
+                _dialogs.Remove(IDdialog);
                 _pool.Remove(dialog);
+                _indexManager.FreeIndex(IDdialog);
             }
 
         }

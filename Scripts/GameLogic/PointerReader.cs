@@ -14,6 +14,8 @@ namespace Pearl
         private int priority = 0;
         [SerializeField]
         private bool useDoubleClick = false;
+        [SerializeField]
+        private bool interrupt = false;
 
         [SerializeField]
         private TrackingSimpleEvent PressEvent;
@@ -31,6 +33,7 @@ namespace Pearl
         public bool Block { get { return isBlock; } }
         public int Priority { get { return priority; } }
         public bool UseDoubleClick { get { return useDoubleClick; } }
+        public bool Interrupt { get { return interrupt; } }
 
         #endregion
 

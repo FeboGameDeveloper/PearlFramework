@@ -249,6 +249,14 @@ namespace Pearl
             }
         }
 
+        public static void ChangeLabel(string newLabel)
+        {
+            if (Singleton<GameManager>.GetIstance(out var gameManager) && newLabel != null && gameManager.FSM != null)
+            {
+                gameManager.FSM.ChangeLabel(newLabel);;
+            }
+        }
+
         public static void UpdateVariableFSM<T>(string nameVar, T content)
         {
             if (Singleton<GameManager>.GetIstance(out var gameManager) && nameVar != null && gameManager.FSM != null)

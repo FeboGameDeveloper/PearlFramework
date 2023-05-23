@@ -9,12 +9,14 @@ namespace Pearl.Examples.INK
         public StoryIndex storyIndex;
         public TextManager textManager;
 
+        private int _id;
+
 
         void Start()
         {
             textManager.OnFinishWriteText.AddListener(FinishWriteText);
-            DialogsManager.CreateDialog(storyIndex, "test", SetText, null, null);
-            DialogsManager.ReadNextText("test");
+            DialogsManager.CreateDialog(storyIndex, out _id, SetText, null, null);
+            DialogsManager.ReadNextText(_id);
         }
 
         public void SetText(TextStruct textStruct)
@@ -24,7 +26,7 @@ namespace Pearl.Examples.INK
 
         private void FinishWriteText()
         {
-            DialogsManager.ReadNextText("test");
+            DialogsManager.ReadNextText(_id);
         }
 
     }

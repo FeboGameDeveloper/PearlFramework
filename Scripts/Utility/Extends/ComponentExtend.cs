@@ -98,24 +98,22 @@ namespace Pearl
             return false;
         }
 
-        public static T GetComponentInParent<T>(this Component @this, bool meToo)
+        public static T GetComponentOnlyInParent<T>(this Component @this)
         {
             T result = default;
+            if (@this == null && @this.transform == null)
+            {
+                return result;
+            }
+
+            @this = @this.transform.parent;
+
             if (@this == null)
             {
                 return result;
             }
 
-            if (meToo)
-            {
-                result = @this.GetComponent<T>();
-            }
-            if (result == null)
-            {
-                result = @this.GetComponentInParent<T>();
-            }
-
-            return result;
+            return @this.GetComponentInParent<T>();
         }
 
         public static bool TryGetComponentInChildren<T>(this Component @this, out T result, bool onlyChildren = true)

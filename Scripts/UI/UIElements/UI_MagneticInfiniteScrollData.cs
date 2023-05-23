@@ -150,7 +150,7 @@ namespace Pearl.UI
                 }
             }
 
-            Debug.LogManager.Log("error");
+            Testing.LogManager.Log("error");
             return default;
         }
 

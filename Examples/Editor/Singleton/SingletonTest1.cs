@@ -1,4 +1,4 @@
-using Pearl.Debug;
+using Pearl.Testing;
 
 namespace Pearl.Examples.SingletonExamples
 {

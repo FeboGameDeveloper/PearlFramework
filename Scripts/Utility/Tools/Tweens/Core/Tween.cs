@@ -1,5 +1,5 @@
 ﻿using Pearl.ClockManager;
-using Pearl.Debug;
+using Pearl.Testing;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -179,6 +179,11 @@ namespace Pearl.Tweens
         #endregion
 
         #region Public Methods
+        public bool CreateTween(in Func<Vector4> currentValue, in Action<Vector4> onSetAction, in AnimationCurveInfo newCurve, params Vector4[] finalValues)
+        {
+            return CreateTween(currentValue, 1, onSetAction, newCurve, ChangeModes.Time, finalValues);
+        }
+
         public bool CreateTween(in Func<Vector4> currentValue, in float timeOrVelocity, in Action<Vector4> onSetAction, in AnimationCurveInfo newCurve, in ChangeModes changeMode, params Vector4[] finalValues)
         {
             _currentState = TweenState.Inactive;

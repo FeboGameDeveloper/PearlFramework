@@ -1,4 +1,4 @@
-﻿using Pearl.Debug;
+﻿using Pearl.Testing;
 using Pearl.Multitags;
 using System;
 using System.Collections.Generic;
@@ -678,7 +678,7 @@ namespace Pearl
         {
             var transforms = @this.GetComponentsInChildren<Transform>(onlyChildren, includeInactive);
 
-            List<T> result = new List<T>();
+            List<T> result = new();
 
             bool isGameObject = typeof(T) == typeof(GameObject);
 
@@ -742,7 +742,7 @@ namespace Pearl
 
         public static Transform[] FindTransformsWithTags(this Transform value, bool only, bool includeChildren, params string[] tagsParameter)
         {
-            List<Transform> result = new List<Transform>();
+            List<Transform> result = new();
 
             if (includeChildren)
             {

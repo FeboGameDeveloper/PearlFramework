@@ -1,6 +1,6 @@
 #if INK
 
-using Pearl.Debug;
+using Pearl.Testing;
 using Pearl.Events;
 using Pearl.Ink;
 using Pearl.UI;
@@ -89,16 +89,17 @@ namespace Pearl
             if (_story != null)
             {
                 _story.ChangePath(path);
+                _isLoop = false;
             }
         }
 
-        public void ReadNextText()
+        public void ReadNextText(bool repeat = false)
         {
             currentPart = PartOfDialog.Finish;
             ReadFinishTrigger();
             if (_countWaitEvents == 0 && !_wait)
             {
-                Read();
+                Read(repeat);
             }
         }
 
@@ -107,10 +108,18 @@ namespace Pearl
             ResetDialogs();
             FinishText?.Invoke();
         }
+
+        public void SetVar(string var, string newValue)
+        {
+            if (_story != null)
+            {
+                _story.SetVar(var, newValue);
+            }
+        }
         #endregion
 
         #region Private Methods
-        private void Read()
+        private void Read(bool repeat = false)
         {
             if (_story == null)
             {
@@ -128,14 +137,14 @@ namespace Pearl
                 ChangePath(_pathLoop);
             }
 
-            if (!_isLoop || _pathLoop != null)
+            if ((!repeat || _currentPiece.text == null) && (!_isLoop || _pathLoop != null))
             {
                 isContinue = _story.GetPieceOfStory(out _currentPiece);
             }
 
             if (isContinue)
             {
-                _isQuestion = _currentPiece.choises != null && _currentPiece.choises.Count > 0 ? true : false;
+                _isQuestion = _currentPiece.choises != null && _currentPiece.choises.Count > 0;
                 _tags = _currentPiece.tags;
 
                 ReadStartTrigger();

@@ -8,17 +8,20 @@ namespace Pearl
     {
         [SerializeField]
         private bool initStart = false;
+        [SerializeField]
+        private bool checkNotVisibleAfterVisible = true;
 
         [SerializeField]
         private Renderer _renderer = null;
-        [SerializeField]
-        private BoolEvent events = null;
-        [SerializeField]
-        private UnityEvent eventsOnlyActive = null;
-        [SerializeField]
-        private UnityEvent eventsOnlyDisactive = null;
 
-        private bool _isVisible;
+        [SerializeField]
+        private UnityEvent eventsOnlyVisible = null;
+        [SerializeField]
+        private UnityEvent eventsOnlyInvisible = null;
+
+
+        private bool _isVisible = false;
+        private bool _itWasVisible = false;
 
 
         // Start is called before the first frame update
@@ -28,15 +31,10 @@ namespace Pearl
             {
                 return;
             }
-            bool aux = _renderer.isVisible;
 
             if (initStart)
             {
-                Invoke(aux);
-            }
-            else
-            {
-                _isVisible = aux;
+                CheckVisible(true);
             }
         }
 
@@ -48,30 +46,33 @@ namespace Pearl
         // Update is called once per frame
         protected void FixedUpdate()
         {
+            CheckVisible();
+        }
+
+        private void CheckVisible(bool ignoreTransition = false)
+        {
             if (_renderer != null)
             {
                 bool aux = _renderer.isVisible;
-                if (aux != _isVisible)
+                if (ignoreTransition || aux != _isVisible)
                 {
-                    Invoke(aux);
+                    _isVisible = aux;
+
+                    if (_isVisible)
+                    {
+                        _itWasVisible = true;
+                    }
+
+                    if (_isVisible)
+                    {
+                        eventsOnlyVisible?.Invoke();
+                    }
+                    else if (!checkNotVisibleAfterVisible || _itWasVisible)
+                    {
+                        eventsOnlyInvisible?.Invoke();
+                    }
                 }
             }
-        }
-
-        private void Invoke(bool isVisible)
-        {
-            _isVisible = isVisible;
-
-            if (_isVisible)
-            {
-                eventsOnlyActive?.Invoke();
-            }
-            else
-            {
-                eventsOnlyDisactive?.Invoke();
-            }
-
-            events?.Invoke(_isVisible);
         }
     }
 }

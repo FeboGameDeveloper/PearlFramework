@@ -1,4 +1,4 @@
-namespace Pearl.Debug
+namespace Pearl.Testing
 {
     [System.AttributeUsage(System.AttributeTargets.Method)]
     public class DebugScreenAttribute : System.Attribute

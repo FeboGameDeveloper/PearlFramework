@@ -71,7 +71,7 @@ namespace Pearl
 
                             var auxSpriteRenderer = tr.GetComponent<SpriteRenderer>();
 
-                            ParallaxData data = new ParallaxData(tr.position, auxSpriteRenderer.bounds.size.x, element.Value, auxSpriteRenderer);
+                            ParallaxData data = new(tr.position, auxSpriteRenderer.bounds.size.x, element.Value, auxSpriteRenderer);
                             data.distance = CalculateDistance(data);
                             _parallaxDatas.Add(tr, data);
                         }
@@ -129,7 +129,6 @@ namespace Pearl
                         data.isVisibile = true;
                         data.initPosition = tr.position;
                         data.distance = CalculateDistance(data);
-
                         _parallaxDatas[tr] = data;
                     }
                 }

@@ -1,4 +1,5 @@
 using Pearl.Input;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -17,6 +18,15 @@ namespace Pearl
         private UpdateModes update = UpdateModes.Update;
         [SerializeField]
         private float doubleClick = 0.2f;
+        [SerializeField]
+        private int sizeBuffer = 5;
+
+        [SerializeField]
+        private string action = "";
+        [SerializeField]
+        private string map = "";
+        [SerializeField]
+        private int order = 0;
         #endregion
 
         #region Private fields
@@ -28,6 +38,9 @@ namespace Pearl
 
         private InputAction _click;
         private Vector2 _position;
+        private RaycastHit[] _hits;
+        RaycastHit2D[] _hits2D;
+        int _numberHits = 0;
         #endregion
 
         #region Static Methods
@@ -54,61 +67,11 @@ namespace Pearl
         {
             base.Awake();
 
-            _click = new InputAction(binding: "<Mouse>/leftButton");
+            _hits = new RaycastHit[sizeBuffer];
+            _hits2D = new RaycastHit2D[sizeBuffer];
 
-            _click.performed += ctx =>
-            {
-                if (gameCamera == null)
-                {
-                    return;
-                }
-
-                _auxes.Clear();
-
-                if (dimension == DimensionsEnum.ThreeDimension)
-                {
-                    _position = PointerExtend.GetScreenPosition();
-                    RaycastHit[] hits = Physics.RaycastAll(gameCamera.ScreenPointToRay(_position), Mathf.Infinity);
-
-                    if (hits.IsAlmostSpecificCount())
-                    {
-                        foreach (var hit in hits)
-                        {
-                            if (hit.collider != null && hit.collider.TryGetComponent<PointerReader>(out var clickable))
-                            {
-                                _auxes.Add(clickable);
-                            }
-                        }
-
-                        ClickableEvent();
-                    }
-                }
-                else
-                {
-                    _position = PointerExtend.PointerWorldPosition(gameCamera);
-                    RaycastHit2D[] hits2D = Physics2D.RaycastAll(_position, -Vector3.forward);
-
-                    if (hits2D.IsAlmostSpecificCount())
-                    {
-                        foreach (var hit in hits2D)
-                        {
-                            if (hit.collider != null && hit.collider.TryGetComponent<PointerReader>(out var clickable))
-                            {
-                                _auxes.Add(clickable);
-                            }
-                        }
-
-                        ClickableEvent();
-                    }
-                }
-            };
-
-            _click.canceled += ctx =>
-            {
-                OnClickDetach();
-            };
-
-            _click.Enable();
+            InputManager.PerformedHandle(action, OnClick, ActionEvent.Add, StateButton.Down, map, order);
+            InputManager.PerformedHandle(action, OnClickDetach, ActionEvent.Add, StateButton.Up, map, order);
         }
 
         protected void Update()
@@ -137,6 +100,55 @@ namespace Pearl
         #endregion
 
         #region Private Methods
+        private void OnClick()
+        {
+            if (gameCamera == null)
+            {
+                return;
+            }
+
+            _auxes.Clear();
+
+            _numberHits = 0;
+            if (dimension == DimensionsEnum.ThreeDimension)
+            {
+                _position = PointerExtend.GetScreenPosition();
+
+                _numberHits = PhysicsExtend.RaycastNonAlloc(gameCamera.ScreenPointToRay(_position), _hits, Mathf.Infinity);
+
+                if (_numberHits > 0)
+                {
+                    foreach (var hit in _hits)
+                    {
+                        if (hit.collider != null && hit.collider.TryGetComponent<PointerReader>(out var clickable))
+                        {
+                            _auxes.Add(clickable);
+                        }
+                    }
+
+                    ClickableEvent();
+                }
+            }
+            else
+            {
+                _position = PointerExtend.PointerWorldPosition(gameCamera);
+                _numberHits = Physics2DExtend.RaycastNonAlloc(_position, -Vector3.forward, _hits2D, true);
+
+                if (_numberHits > 0)
+                {
+                    foreach (var hit in _hits2D)
+                    {
+                        if (hit.collider != null && hit.collider.TryGetComponent<PointerReader>(out var clickable))
+                        {
+                            _auxes.Add(clickable);
+                        }
+                    }
+
+                    ClickableEvent();
+                }
+            }
+        }
+
         private void OnClickDetach()
         {
             foreach (var clickable in _clickables)
@@ -179,9 +191,9 @@ namespace Pearl
             if (dimension == DimensionsEnum.ThreeDimension)
             {
                 _position = PointerExtend.GetScreenPosition();
-                RaycastHit[] hits = Physics.RaycastAll(gameCamera.ScreenPointToRay(_position), Mathf.Infinity);
+                _numberHits = PhysicsExtend.RaycastNonAlloc(gameCamera.ScreenPointToRay(_position), _hits, Mathf.Infinity);
 
-                if (hits == null)
+                if (_numberHits <= 0)
                 {
                     foreach (var element in _trigger)
                     {
@@ -192,7 +204,7 @@ namespace Pearl
                 }
                 else
                 {
-                    foreach (var hit in hits)
+                    foreach (var hit in _hits)
                     {
                         if (hit.collider != null && hit.collider.TryGetComponent<PointerReader>(out var clickable))
                         {
@@ -206,9 +218,9 @@ namespace Pearl
             else
             {
                 _position = PointerExtend.PointerWorldPosition(gameCamera);
-                RaycastHit2D[] hits2D = Physics2D.RaycastAll(_position, -Vector3.forward);
+                _numberHits = Physics2DExtend.RaycastNonAlloc(_position, -Vector3.forward, _hits2D, true);
 
-                if (hits2D == null)
+                if (_numberHits <= 0)
                 {
                     foreach (var element in _trigger)
                     {
@@ -219,7 +231,7 @@ namespace Pearl
                 }
                 else
                 {
-                    foreach (var hit in hits2D)
+                    foreach (var hit in _hits2D)
                     {
                         if (hit.collider != null && hit.collider.TryGetComponent<PointerReader>(out var clickable))
                         {
@@ -282,6 +294,11 @@ namespace Pearl
 
             foreach (var aux in _auxes)
             {
+                if (aux.Interrupt)
+                {
+                    InputManager.ChangeInterrupt(true);
+                }
+
                 if (_doubleClicks.ContainsKey(aux))
                 {
                     aux.OnClickPress();

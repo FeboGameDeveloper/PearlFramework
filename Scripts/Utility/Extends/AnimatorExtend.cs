@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Pearl
@@ -13,6 +14,22 @@ namespace Pearl
 
             animator.Rebind();
             animator.Update(0f);
+        }
+
+        public static AnimationClip GetClip(this Animator anim, in string name)
+        {
+            if (anim != null)
+            {
+                AnimationClip[] clips = anim.runtimeAnimatorController.animationClips;
+                foreach (AnimationClip clip in clips)
+                {
+                    if (clip.name == name)
+                    {
+                        return clip;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

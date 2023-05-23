@@ -19,10 +19,12 @@ namespace Pearl
 
         public static void RemoveTail<TSource>(this List<TSource> @this)
         {
-            if (@this != null)
-            {
-                @this.RemoveAt(@this.Count - 1);
-            }
+            @this?.RemoveAt(@this.Count - 1);
+        }
+
+        public static List<TSource> SortInverse<TSource>(this List<TSource> @this)
+        {
+            return @this?.OrderByDescending(x => x).ToList();
         }
 
 

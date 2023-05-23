@@ -3,23 +3,28 @@
 using NodeCanvas.Framework;
 using ParadoxNotion.Design;
 using System;
+using System.Reflection;
 using UnityEngine;
 
 namespace Pearl
 {
     [Category("Pearl")]
-    public class PearlInvokeMethod : ActionTask<Transform>
+    public class PearlInvokeReflectionTask : ActionTask<Transform>
     {
         public BBParameter<NameClass> nameClassBB = default;
         public BBParameter<bool> useAgentBB = true;
-        public BBParameter<bool> useParameterBB = false;
-        [Conditional("useParameterBB", 1)]
-        public BBParameter<PrimitiveEnum> primitiveStructBB = default;
+
 
         [Conditional("useAgentBB", 0)]
         public BBParameter<string> nameRoot = default;
-
         public BBParameter<string> nameMethod = default;
+
+        public BBParameter<bool> useParameterBB = false;
+        [Conditional("useParameterBB", 1)]
+        public BBParameter<bool> isProperty = false;
+        [Conditional("useParameterBB", 1)]
+        public BBParameter<PrimitiveEnum> primitiveStructBB = default;
+
 
         [Conditional("useParameterBB", 1)]
         [Conditional("primitiveStructBB", (int)PrimitiveEnum.Bool)]
@@ -76,16 +81,22 @@ namespace Pearl
 
                 if (component != null)
                 {
-                    var method = component.GetType().GetMethod(nameMethod.value, ReflectionExtend.FLAGS_ALL);
-
-                    object[] parameters = null;
-                    if (useParameterBB != null && useParameterBB.value)
+                    if ((useParameterBB != null && useParameterBB.value && isProperty != null && isProperty.value))
                     {
-                        parameters = new object[1];
-                        parameters[0] = GetParameter();
+                        var propiety = component.GetType().GetProperty(nameMethod.value, ReflectionExtend.FLAGS_ALL);
+                        propiety?.SetValue(component, GetParameter());
                     }
-
-                    method.Invoke(component, parameters);
+                    else
+                    {
+                        var method = component.GetType().GetMethod(nameMethod.value, ReflectionExtend.FLAGS_ALL);
+                        object[] parameters = null;
+                        if (useParameterBB != null && useParameterBB.value)
+                        {
+                            parameters = new object[1];
+                            parameters[0] = GetParameter();
+                        }
+                        method?.Invoke(component, parameters);
+                    }
                 }
             }
 

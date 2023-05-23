@@ -1,4 +1,4 @@
-﻿using Pearl.Debug;
+﻿using Pearl.Testing;
 using System;
 using System.Globalization;
 using UnityEngine;
@@ -109,12 +109,14 @@ namespace Pearl
         public static float Lerp(float a, float b, float t, FunctionEnum function)
         {
             var func = FunctionDefinition.GetFunction(function);
-            if (func != null)
-            {
-                float tChanged = func.Invoke(t);
-                return Mathf.Lerp(a, b, tChanged);
-            }
-            return 0;
+            float tChanged = func != null ? func.Invoke(t) : t;
+            return Mathf.Lerp(a, b, tChanged);
+        }
+
+        public static float Lerp(float a, float b, float t, AnimationCurveInfo curve)
+        {
+            float tChanged = curve != null ? curve.Evaluate(t) : t;
+            return Mathf.Lerp(a, b, tChanged);
         }
 
         public static float Proportion(float numberA, float numberB, float numberC)

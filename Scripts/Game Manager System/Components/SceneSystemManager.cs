@@ -76,6 +76,11 @@ namespace Pearl
             }
         }
 
+        public static void RepeasScene()
+        {
+            EnterNewScene(CurrentScene);
+        }
+
         public static void EnterNewSceneAsync(in string newScene, Action callback, bool useLoadingBar)
         {
             if (Singleton<SceneSystemManager>.GetIstance(out var sceneManager))

@@ -9,6 +9,9 @@ namespace Pearl.Events
         private string eventName = string.Empty;
 
         [SerializeField]
+        private bool removeOnDisactive = true;
+
+        [SerializeField]
         private UnityEvent unityEvent = null;
 
         // Start is called before the first frame update
@@ -23,15 +26,25 @@ namespace Pearl.Events
         {
             base.OnDisable();
 
-            PearlEventsManager.RemoveAction(eventName, Invoke);
+            if (removeOnDisactive)
+            {
+                PearlEventsManager.RemoveAction(eventName, Invoke);
+            }
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (!removeOnDisactive)
+            {
+                PearlEventsManager.RemoveAction(eventName, Invoke);
+            }
         }
 
         private void Invoke()
         {
-            if (unityEvent != null)
-            {
-                unityEvent.Invoke();
-            }
+            unityEvent?.Invoke();
         }
     }
 }

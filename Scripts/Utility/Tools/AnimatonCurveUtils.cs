@@ -1,4 +1,4 @@
-using Pearl.Debug;
+using Pearl.Testing;
 using System;
 using UnityEngine;
 
@@ -59,7 +59,6 @@ namespace Pearl
                 if (animationCurve == null)
                 {
                     LogManager.LogWarning("This is not initialized");
-                    result = 0;
                 }
 
                 result = animationCurve.Evaluate(x);

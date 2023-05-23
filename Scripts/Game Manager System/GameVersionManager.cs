@@ -25,7 +25,7 @@ namespace Pearl
 
             if (!_editorGameVersion.IsEqualContainer(_gameVersion))
             {
-                Pearl.Debug.LogManager.Log("difference version");
+                Pearl.Testing.LogManager.Log("difference version");
 
                 _instance = ReflectionExtend.CreateInstance<GameVersionManager>(versionType);
                 if (_instance != null)

@@ -9,8 +9,8 @@ namespace Pearl.NodeCanvas.Tasks
     public class SetLabelFSMTask : ActionTask<PearlFSMOwner>
     {
         public BBParameter<string> newValue;
-
         public BBParameter<bool> gameManager;
+        public BBParameter<bool> checkTransitions = false;
 
         protected override void OnExecute()
         {
@@ -18,11 +18,25 @@ namespace Pearl.NodeCanvas.Tasks
             {
                 if (gameManager != null && gameManager.value)
                 {
-                    GameManager.CheckTransitionsAfterChangeLabel(newValue.value);
+                    if (checkTransitions != null && checkTransitions.value)
+                    {
+                        GameManager.ChangeLabel(newValue.value);
+                    }
+                    else
+                    {
+                        GameManager.CheckTransitionsAfterChangeLabel(newValue.value);
+                    }
                 }
                 else
                 {
-                    agent.ChangeLabel(newValue.value);
+                    if (checkTransitions != null && checkTransitions.value)
+                    {
+                        agent.CheckForceTransitionsAfterChangeLabel(newValue.value);
+                    }
+                    else
+                    {
+                        agent.ChangeLabel(newValue.value);
+                    }
                 }
             }
             EndAction();

@@ -43,6 +43,7 @@ namespace Pearl
         #region Private Methods
         private readonly List<string> _piecesOfText = new();
         private int _indexPieces = 0;
+        private bool _longText = false;
         #endregion
 
         #region Unity Callbacks
@@ -76,7 +77,7 @@ namespace Pearl
 
             _rawText = _rawText.Replace("\\n", "\n");
 
-#if lOCALIZATION
+#if LOCALIZATION
             if (isLocalize)
             {
                 _auxText = ChangeLocalization();
@@ -103,6 +104,12 @@ namespace Pearl
 
             _piecesOfText.Clear();
             SubdivideText(_auxText);
+
+            if (_piecesOfText.IsAlmostSpecificCount(1))
+            {
+                _longText = true;
+            }
+
             _indexPieces = 0;
             SetElementsOfPieces();
         }
@@ -148,10 +155,38 @@ namespace Pearl
             }
         }
 
+        protected override void ResetTextContainer()
+        {
+            PearlInvoke.StopTimer(SetElementsOfPieces);
+
+            base.ResetTextContainer(); 
+        }
+
+        public override void SkipText()
+        {
+            if (_currentState == StateText.Dictated)
+            {
+                _skipText = true;
+            }
+            else if (_currentState == StateText.Waiting)
+            {
+                _skipText = false;
+                PearlInvoke.StopTimer(SetElementsOfPieces);
+                SetElementsOfPieces();
+            }
+        }
+
+        protected override void FinishText()
+        {
+            _longText = false;
+
+            base.FinishText();
+        }
+
         protected override void PreFinishText()
         {
             _indexPieces++;
-
+            _currentState = StateText.Waiting;
             if (typeDynamicText == TypeDynamicText.Interactive)
             {
                 var input = InputManager.Input;

@@ -13,17 +13,17 @@ namespace Pearl.Examples.EventExamples
 
         public void ReadDown()
         {
-            Pearl.Debug.LogManager.Log("ReadDown");
+            Pearl.Testing.LogManager.Log("ReadDown");
         }
 
         public void ReadUp()
         {
-            Pearl.Debug.LogManager.Log("ReadUp");
+            Pearl.Testing.LogManager.Log("ReadUp");
         }
 
         public void ReadVector(Vector2 vector)
         {
-            Pearl.Debug.LogManager.Log(vector);
+            Pearl.Testing.LogManager.Log(vector);
         }
 
         public void ActiveInput()
@@ -38,27 +38,27 @@ namespace Pearl.Examples.EventExamples
 
         public void PressEvent()
         {
-            Pearl.Debug.LogManager.Log("press event");
+            Pearl.Testing.LogManager.Log("press event");
         }
 
         public void DoublePressEvent()
         {
-            Pearl.Debug.LogManager.Log("double press event");
+            Pearl.Testing.LogManager.Log("double press event");
         }
 
         public void DetachEvent()
         {
-            Pearl.Debug.LogManager.Log("detach event");
+            Pearl.Testing.LogManager.Log("detach event");
         }
 
         public void EnterEvent()
         {
-            Pearl.Debug.LogManager.Log("enter event");
+            Pearl.Testing.LogManager.Log("enter event");
         }
 
         public void ExitEvent()
         {
-            Pearl.Debug.LogManager.Log("exit event");
+            Pearl.Testing.LogManager.Log("exit event");
         }
     }
 }

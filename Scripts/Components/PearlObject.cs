@@ -7,6 +7,9 @@ namespace Pearl
     public sealed class PearlObject : MonoBehaviour
     {
         #region Inspector Fields
+        [SerializeField]
+        private bool disactiveAtStart = false;
+
         [Header("Don't destroy load")]
         /// <summary>
         //  If the Boolean is true, the GameObject will be not destroy at load
@@ -42,6 +45,14 @@ namespace Pearl
             }
         }
 
+        private void Start()
+        {
+            if (disactiveAtStart)
+            {
+                gameObject.SetActive(false);
+            }
+        }
+
         private void OnDestroy()
         {
             DestroyHandler?.Invoke();
@@ -50,6 +61,13 @@ namespace Pearl
         private void OnDisable()
         {
             DisactiveHandler?.Invoke(gameObject);
+        }
+        #endregion
+
+        #region Public
+        public void Destroy()
+        {
+            GameObjectExtend.DestroyExtend(gameObject);
         }
         #endregion
 

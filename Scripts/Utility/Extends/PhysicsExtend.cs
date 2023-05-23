@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Pearl
@@ -10,6 +11,15 @@ namespace Pearl
             {
                 SetVelocity(@this, velocity, finalTransform.position, neighbourhood);
             }
+        }
+
+        public static int RaycastNonAlloc(Ray ray, RaycastHit[] result, float distance, bool clearArrayBeforeSearch = false)
+        {
+            if (clearArrayBeforeSearch)
+            {
+                result.ClearAll();
+            }
+            return Physics.RaycastNonAlloc(ray, result, distance);
         }
 
         public static void SetVelocity(this Rigidbody @this, Vector3 velocity, Vector3 finalPosition, float neighbourhood = 0)

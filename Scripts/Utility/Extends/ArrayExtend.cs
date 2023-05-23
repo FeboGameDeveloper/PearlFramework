@@ -17,6 +17,11 @@ namespace Pearl
             return result;
         }
 
+        public static void ClearAll(this Array array)
+        {
+            Array.Clear(array, 0, array.Length - 1);
+        }
+
         public static TSource[] FilterArray<TSource>(this ICollection<TSource> @this, Func<TSource, bool> filter)
         {
             var list = CollectionExtend.FilterCollection(@this, filter);

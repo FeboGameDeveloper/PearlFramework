@@ -24,6 +24,10 @@ namespace Pearl
             public bool ignoreZeroValue = false;
 
             [ConditionalField("@output == Button")]
+            public int order;
+            [ConditionalField("@output == Button")]
+            public bool interrupt;
+            [ConditionalField("@output == Button")]
             public SimpleEvent action;
             [ConditionalField("@output == Float")]
             public FloatEvent floatAction;
@@ -40,7 +44,7 @@ namespace Pearl
         #endregion
 
         #region Private Fields
-        private List<InputInfo> _inputsNoVoid = new();
+        private readonly List<InputInfo> _inputsNoVoid = new();
         #endregion
 
         #region Unity Callbacks
@@ -126,7 +130,8 @@ namespace Pearl
                         inputInfo.auxAction = () => inputInfo.action?.Invoke();
                     }
 
-                    inputInterface.PerformedHandle(inputInfo.nameAction, inputInfo.auxAction, actionEvent, inputInfo.stateButton);
+                    inputInterface.PerformedHandle(inputInfo.nameAction, inputInfo.auxAction, actionEvent, inputInfo.stateButton, "", inputInfo.order);
+                    inputInterface.ChangeInterrupt(inputInfo.interrupt, inputInfo.nameAction, inputInfo.stateButton, "");
                 }
             }
         }

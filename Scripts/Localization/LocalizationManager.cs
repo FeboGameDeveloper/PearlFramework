@@ -1,6 +1,6 @@
 #if LOCALIZATION
 
-using Pearl.Debug;
+using Pearl.Testing;
 using Pearl.Events;
 using Pearl.Input;
 using Pearl.Storage;
@@ -180,7 +180,7 @@ namespace Pearl
 
         private static string VisualizeError(in string ID, in bool dontVisualizeWithErrorLocalization)
         {
-            Debug.LogManager.LogWarning("The text can't be localized", "Localization");
+            Testing.LogManager.LogWarning("The text can't be localized", "Localization");
             if (dontVisualizeWithErrorLocalization)
             {
                 return "";

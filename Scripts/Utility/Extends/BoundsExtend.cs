@@ -56,12 +56,7 @@ namespace Pearl
         /// <returns></returns>
         public static Vector3 RandomPointInBounds(Bounds bounds)
         {
-            return new Vector3
-                (
-                Random.Range(bounds.min.x, bounds.max.x),
-                Random.Range(bounds.min.y, bounds.max.y),
-                Random.Range(bounds.min.z, bounds.max.z)
-                );
+            return new Vector3(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y), Random.Range(bounds.min.z, bounds.max.z));
         }
 
         /// <summary>
@@ -163,12 +158,5 @@ namespace Pearl
             returnBounds = new(Vector3.zero, Vector3.zero);
             return returnBounds;
         }
-
-        private static void GetRotateBounds(Bounds bounds, Quaternion rotation)
-        {
-            Vector3 center = bounds.center;
-            float minX = bounds.min.x;
-        }
-
     }
 }

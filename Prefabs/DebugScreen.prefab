@@ -679,7 +679,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7536600718130491197}
   - component: {fileID: 2315197186598921766}
-  - component: {fileID: 2367222726907194937}
   m_Layer: 5
   m_Name: DebugScreen
   m_TagString: Untagged
@@ -734,28 +733,6 @@ MonoBehaviour:
   m_Spacing: {x: 10, y: 10}
   m_Constraint: 0
   m_ConstraintCount: 2
---- !u!114 &2367222726907194937
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6420556128983487227}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 490d811bbeff7ec4a9b10eeff0de7e4b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  storageElement: 0
-  initLoadVars: 0
-  idStore: 
-  debugView:
-    m_keys:
-    - timerComplex
-    - Tween
-    m_values: 0001
-  debugScreenElementPrefab: {fileID: 5238977518992842117, guid: f841b08708c48f74cb7f6163d29dff9d,
-    type: 3}
 --- !u!1 &7483826065709061904
 GameObject:
   m_ObjectHideFlags: 0

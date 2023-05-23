@@ -1,4 +1,4 @@
-namespace Pearl.Debug
+namespace Pearl.Testing.ScreenVars
 {
     public class DebugScreenVarsNative
     {
