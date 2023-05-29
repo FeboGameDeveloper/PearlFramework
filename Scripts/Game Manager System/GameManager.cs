@@ -63,6 +63,9 @@ namespace Pearl
         [ReadOnly, SerializeField, Tooltip("Game Name")]
         private string gameName = "Game";
 
+        [SerializeField]
+        private int limitFrameRate = 60;
+
         [SerializeField, ClassImplements(typeof(GameVersionManager))]
         public ClassTypeReference versionType;
 
@@ -135,6 +138,8 @@ namespace Pearl
         {
             base.Awake();
 
+            SettingLimitFrameRate();
+
             if (FSMObject != null)
             {
                 FSM = (IFSM)FSMObject;
@@ -193,6 +198,12 @@ namespace Pearl
         #endregion
 
         #region Init Methods
+        private void SettingLimitFrameRate()
+        {
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = limitFrameRate;
+        }
+
         private void ControlIsOnline()
         {
             if (Application.internetReachability == NetworkReachability.NotReachable)

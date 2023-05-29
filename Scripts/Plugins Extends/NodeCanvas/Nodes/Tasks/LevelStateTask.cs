@@ -14,7 +14,7 @@ namespace Pearl.NodeCanvas.Tasks
         {
             if (stateLevelBB.IsExist(out var stateLevel))
             {
-                LevelManager.StateLevel = stateLevel;
+                //LevelManager.StateLevel = stateLevel;
             }
 
             EndAction();

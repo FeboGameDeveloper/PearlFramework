@@ -67,6 +67,17 @@ namespace Pearl
         }
         #endregion
 
+        public static float WrapAngle(float angle)
+        {
+            angle %= 360;
+            if (angle > 180)
+            {
+                return angle - 360;
+            }
+
+            return angle;
+        }
+
         public static float Nearest(float value, params float[] values)
         {
             float distance = Mathf.Infinity;

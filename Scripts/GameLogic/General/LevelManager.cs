@@ -8,11 +8,14 @@ using Pearl.NodeCanvas;
 
 namespace Pearl
 {
+    #region Enum
     public enum StateLevelEnum { Pause, InGame, GameOver, }
+    #endregion
 
     [DisallowMultipleComponent]
     public abstract class LevelManager : PearlBehaviour, ISingleton
     {
+        #region Inspector Fields
         [SerializeField]
         private bool isOnApplicationPause = true;
         [SerializeField]
@@ -24,17 +27,16 @@ namespace Pearl
         [SerializeField]
         protected PearlFSMOwner FSM = null;
 #endif
-
-        [ReadOnly]
-        [SerializeField]
+        [ReadOnly, SerializeField]
         protected StateLevelEnum _stateLevel = StateLevelEnum.InGame;
+        #endregion
+
+        #region Private Fields
 
 
-        protected Action _functionPause;
-        protected Action _functionUnpause;
+        #endregion
 
-
-
+        #region Static
         public static bool GetIstance(out LevelManager result)
         {
             return Singleton<LevelManager>.GetIstance(out result);
@@ -50,7 +52,7 @@ namespace Pearl
                 }
                 else return StateLevelEnum.InGame;
             }
-            set
+            private set
             {
                 if (GetIstance(out var manager))
                 {
@@ -65,9 +67,43 @@ namespace Pearl
         {
             if (GetIstance(out var manager))
             {
+                PearlEventsManager.CallEvent(ConstantStrings.Reset);
                 manager.ResetGamePrivate();
             }
         }
+
+        public static void GameOver()
+        {
+            if (GetIstance(out var manager))
+            {
+                manager._stateLevel = StateLevelEnum.InGame;
+                PearlEventsManager.CallEvent(ConstantStrings.Gameover);
+                manager.GameOverPrivate();
+            }
+        }
+
+        public static void CallPause(bool pause)
+        {
+            if (GetIstance(out var manager))
+            {
+#if INK
+                DialogsManager.Pause(pause);
+#endif
+                if (pause && StateLevel == StateLevelEnum.InGame)
+                {
+                    StateLevel = StateLevelEnum.Pause;
+                    PearlEventsManager.CallEvent(ConstantStrings.Pause, pause);
+                    manager.PauseInternal();
+                }
+                else if (!pause && StateLevel == StateLevelEnum.Pause)
+                {
+                    StateLevel = StateLevelEnum.InGame;
+                    PearlEventsManager.CallEvent(ConstantStrings.Pause, pause);
+                    manager.UnpauseInternal();
+                }
+            }
+        }
+        #endregion
 
         #region Unity Callbacks
         protected virtual void Reset()
@@ -80,29 +116,7 @@ namespace Pearl
         protected override void Start()
         {
             base.Start();
-
-            _functionPause = () => CallPause(true);
-            _functionUnpause = () => CallPause(false);
-
-            PearlEventsManager.AddAction(ConstantStrings.Gameover, OnGameOver);
-            PearlEventsManager.AddAction<bool>(ConstantStrings.Pause, CallPause);
-        }
-
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-
-            _stateLevel = StateLevelEnum.InGame;
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-
-            PearlEventsManager.RemoveAction(ConstantStrings.Gameover, OnGameOver);
-            PearlEventsManager.RemoveAction<bool>(ConstantStrings.Pause, CallPause);
-        }
-
+        } 
 
         //si attiva quado la window non è selezionata
         private void OnApplicationPause(bool pause)
@@ -114,66 +128,14 @@ namespace Pearl
         }
         #endregion
 
-        protected virtual void OnGameOver()
-        {
-            _stateLevel = StateLevelEnum.GameOver;
-        }
-
-        protected virtual void ResetGamePrivate()
-        {
-        }
-
-        private static void CallPause(bool pause)
-        {
-            if (GetIstance(out var manager))
-            {
-#if INK
-                DialogsManager.Pause(pause);
-#endif
-
-                if (pause)
-                {
-                    StateLevel = StateLevelEnum.Pause;
-                    manager.PauseInternal();
-                }
-                else
-                {
-                    StateLevel = StateLevelEnum.InGame;
-                    manager.UnpauseInternal();
-                }
-            }
-        }
-
-#if NODE_CANVAS
-        protected void ChangeLabel(string label)
-        {
-            GameManager.CheckTransitionsAfterChangeLabel(label);
-        }
-#endif
-
+        #region Abstract
         protected abstract void PauseInternal();
 
         protected abstract void UnpauseInternal();
 
+        protected abstract void ResetGamePrivate();
 
-        public void OnCallPause(bool pause)
-        {
-            InputManager.ChangeInterrupt(true);
-            CallPause(pause);
-        }
-
-        public void OnCallPause()
-        {
-            InputManager.ChangeInterrupt(true);
-            if (StateLevel == StateLevelEnum.Pause)
-            {
-                CallPause(false);
-            }
-            else
-            {
-                CallPause(true);
-            }
-        }
+        protected abstract void GameOverPrivate();
+        #endregion
     }
-
 }

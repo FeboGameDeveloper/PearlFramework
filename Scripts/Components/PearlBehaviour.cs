@@ -60,7 +60,36 @@ namespace Pearl
         protected virtual void OnEnableAfterStart()
         {
         }
-        #endregion
+
+#if UNITY_EDITOR
+        protected virtual void OnValidate()
+        {
+            UnityEditor.EditorApplication.delayCall += OnValidatePrivate;
+        }
+
+        protected virtual void OnValidateOnlyInPlaying()
+        {
+
+        }
+
+        private void OnValidatePrivate()
+        {
+            UnityEditor.EditorApplication.delayCall -= OnValidatePrivate;
+
+            if (this == null)
+            {
+                return;
+            }
+
+            if (Application.isPlaying)
+            {
+                OnValidateOnlyInPlaying();
+            }
+        }
+
+#endif
+
+#endregion
 
         #region Public Methods
         public void ForceStart()
@@ -78,6 +107,7 @@ namespace Pearl
                 Awake();
             }
         }
+
         #region Event
         public void AddAction(string constantStrings, Action action, DeleteGameObjectEnum onDestroy, bool solo = false)
         {

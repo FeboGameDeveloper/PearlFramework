@@ -22,11 +22,11 @@
 
         public const string Gameover = "Gameover";
         public const string Pause = "Pause";
+        public const string Reset = "Reset";
         public const string StartLevel = "StartLevel";
         public const string loadingLevel = "loading";
 
         //FSM
-
         public const string label = "label";
     }
 

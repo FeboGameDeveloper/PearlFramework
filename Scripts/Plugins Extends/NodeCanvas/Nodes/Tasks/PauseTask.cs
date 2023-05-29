@@ -16,7 +16,7 @@ namespace Pearl
         {
             if (pause != null)
             {
-                PearlEventsManager.CallEvent(ConstantStrings.Pause, PearlEventType.Normal, pause.value);
+                LevelManager.CallPause(pause.value);
             }
             EndAction();
         }

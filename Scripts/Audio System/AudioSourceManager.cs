@@ -18,7 +18,7 @@ namespace Pearl
         }
     }
 
-    public class AudioSourceManager : MonoBehaviour, IReset
+    public class AudioSourceManager : MonoBehaviour, IReset, IPause
     {
         #region Insepctor
         [SerializeField]

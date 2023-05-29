@@ -150,7 +150,7 @@ namespace Pearl.UI
 
         public virtual void Pause(bool pause)
         {
-            PearlEventsManager.CallEvent(ConstantStrings.Pause, PearlEventType.Normal, pause);
+            LevelManager.CallPause(pause);
         }
         #endregion
 

@@ -43,7 +43,6 @@ namespace Pearl
         #region Private Methods
         private readonly List<string> _piecesOfText = new();
         private int _indexPieces = 0;
-        private bool _longText = false;
         #endregion
 
         #region Unity Callbacks
@@ -104,12 +103,6 @@ namespace Pearl
 
             _piecesOfText.Clear();
             SubdivideText(_auxText);
-
-            if (_piecesOfText.IsAlmostSpecificCount(1))
-            {
-                _longText = true;
-            }
-
             _indexPieces = 0;
             SetElementsOfPieces();
         }
@@ -174,13 +167,6 @@ namespace Pearl
                 PearlInvoke.StopTimer(SetElementsOfPieces);
                 SetElementsOfPieces();
             }
-        }
-
-        protected override void FinishText()
-        {
-            _longText = false;
-
-            base.FinishText();
         }
 
         protected override void PreFinishText()

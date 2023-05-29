@@ -8,35 +8,20 @@ using UnityEngine;
 
 namespace Pearl.Testing.ScreenVars
 {
-    #region Struct
-    public struct DebugVar
-    {
-        public MemberComplexInfo member;
-        public string name;
-
-        public DebugVar(string name, MemberComplexInfo member)
-        {
-            this.name = name;
-            this.member = member;
-        }
-    }
-    #endregion
-
     public class DebugScreenManager : PearlBehaviour, ISingleton
     {
-        #region Inspector fields
+        #region Inspector Fields
         [SerializeField]
         private StringBoolDictionary debugView = null;
         [SerializeField]
         private GameObject debugScreenPrefab = null;
         [SerializeField]
         private GameObject debugScreenElementPrefab = null;
-        [SerializeField]
-        [ClassImplements(typeof(DebugScreenVarsNative))]
+        [SerializeField, ClassImplements(typeof(DebugScreenVarsNative))]
         protected ClassTypeReference[] initDebugScreenPages = default;
         #endregion
 
-        #region Private Methods
+        #region Private Fields
         private Transform _debugScreenParent;
         private readonly List<Type> _activeTypes = new();
         private readonly List<DebugScreenElement> _activeElements = new();
@@ -85,29 +70,20 @@ namespace Pearl.Testing.ScreenVars
             }
         }
 
-        private void OnValidate() => UnityEditor.EditorApplication.delayCall += OnValidatePrivate;
-
-        private void OnValidatePrivate()
+#if UNITY_EDITOR
+        protected override void OnValidateOnlyInPlaying()
         {
-            UnityEditor.EditorApplication.delayCall -= OnValidatePrivate;
-            if (this == null)
-            {
-                return;
-            }
+            Type[] types = _activeTypes.ToArray();
+            ClearDebugScreen();
 
-            if (Application.isPlaying)
+            foreach (var type in types)
             {
-                Type[] types = _activeTypes.ToArray();
-                ClearDebugScreen();
-
-                foreach (var type in types)
-                {
-                    AddPage(type);
-                }
+                AddPage(type);
             }
         }
+#endif
 
-        #endregion
+#endregion
 
         #region Private methods
         private void OpenDebugScreenIntern(bool open)
@@ -115,7 +91,7 @@ namespace Pearl.Testing.ScreenVars
             if (open && !_isOpen)
             {
                 _isOpen = true;
-                InitDebugScreen();
+                ActivateDebugScreen();
             }
             else if (!open && _isOpen)
             {
@@ -125,7 +101,7 @@ namespace Pearl.Testing.ScreenVars
             }
         }
 
-        private void InitDebugScreen()
+        private void ActivateDebugScreen()
         {
             GameObjectExtend.CreateUIlement(debugScreenPrefab, out _debugScreenParent, canvasTipology: CanvasTipology.Debug);
             if (_debugScreenParent != null)
@@ -170,12 +146,11 @@ namespace Pearl.Testing.ScreenVars
                     return attr.DebugCategory;
                 });
 
+
                 if (category != null && debugView.IsNotNullAndTryGetValue(category, out bool result) && !result)
                 {
                     continue;
                 }
-
-
                 GameObjectExtend.CreateGameObject<DebugScreenElement>(debugScreenElementPrefab, out DebugScreenElement debugElement, "Element", default, default, _debugScreenParent);
                 if (debugElement != null)
                 {
@@ -183,7 +158,6 @@ namespace Pearl.Testing.ScreenVars
                     debugElement.SetField(membersInfos[i], page, name);
                 }
             }
-
         }
 
         private void RemovePageIntern(Type page)
@@ -196,7 +170,6 @@ namespace Pearl.Testing.ScreenVars
                 _activeElements.RemoveAt(index);
             }
         }
-
 
         private void ClearDebugScreen()
         {

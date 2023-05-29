@@ -1,5 +1,4 @@
-﻿using Pearl.FrameRate;
-using Pearl.UI;
+﻿using Pearl.UI;
 using UnityEngine;
 
 namespace Pearl
@@ -8,13 +7,9 @@ namespace Pearl
     {
         [SerializeField]
         private StringBoolDictionary debugViews = null;
-        [SerializeField]
-        private FrameRateManager frameRateManager = null;
-        [SerializeField]
-        private GameObject frameRatePrefab = null;
 
-        [SerializeField]
-        private GameObject tunning = null;
+        //[SerializeField]
+        //private GameObject tunning = null;
 
         public const string debugFPS = "debugFPS";
         public const string debugInScreen = "debugScreen";
@@ -67,26 +62,6 @@ namespace Pearl
         {
             if (debugViews != null)
             {
-                if (debugViews.TryGetValue(debugFPS, out bool isActive))
-                {
-                    if (isActive)
-                    {
-                        GameObjectExtend.CreateUIlement(frameRatePrefab, out _, canvasTipology: CanvasTipology.Debug);
-                    }
-
-                    if (frameRateManager)
-                    {
-                        frameRateManager.enabled = isActive;
-                    }
-                }
-
-                if (debugViews.TryGetValue(debugInScreen, out isActive))
-                {
-                    if (frameRateManager)
-                    {
-                        frameRateManager.enabled = isActive;
-                    }
-                }
             }
         }
     }

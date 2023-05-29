@@ -159,7 +159,9 @@ namespace TypeReferences
 
                 foreach (var interfaceType in type.GetInterfaces())
                     if (interfaceType == InterfaceType)
+                    {
                         return true;
+                    }
             }
             return false;
         }
